@@ -65,6 +65,11 @@ jobs:
   module-install:
     name: Odoo install + tests (TransactionCase)
     runs-on: ubuntu-22.04
+    # Image officielle Odoo 13 (Odoo + toutes les dependances reelles preinstallees)
+    # -> install + tests REELS du module (pas de pip install Odoo flaky).
+    container:
+      image: odoo:13.0
+      options: --user root
     services:
       postgres:
         image: postgres:13
@@ -72,7 +77,6 @@ jobs:
           POSTGRES_USER: odoo
           POSTGRES_PASSWORD: odoo
           POSTGRES_DB: postgres
-        ports: ["5432:5432"]
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -80,28 +84,19 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.8"
-      - name: Install Odoo 13 + dependencies
-        continue-on-error: true  # Odoo 13 mal package sur PyPI / Python 3.8 -> best-effort
+      - name: Install + test module (Odoo 13 officiel)
         run: |
-          pip install --upgrade pip wheel
-          pip install psycopg2-binary lxml passlib Pillow python-dateutil pytz werkzeug==0.16 \
-                      psutil reportlab gevent qrcode vobject decorator num2words python-stdnum \
-                      requests babel docutils freezegun jinja2 ofxparse libsass \
-                      Pillow PyYAML xlrd xlsxwriter polib idna chardet matplotlib
-          pip install odoo==13.0.post20230304 || pip install odoo  # version permissive
-      - name: Install + test module
-        run: |
-          PGPASSWORD=odoo psql -h localhost -U odoo -c "CREATE DATABASE gmao_test;"
-          odoo --addons-path=. -d gmao_test -i gmao_suite \
-               --db_host=localhost --db_user=odoo --db_password=odoo \
+          set -o pipefail
+          odoo -d gmao_test -i gmao_suite \
+               --addons-path=/usr/lib/python3/dist-packages/odoo/addons,"$GITHUB_WORKSPACE" \
+               --db_host=postgres --db_user=odoo --db_password=odoo \
                --test-enable --stop-after-init --without-demo=all \
-               --log-level=warn 2>&1 | tee odoo.log
-          # Echec si "FAIL" dans les tests
-          grep -E "^.*odoo.tests.* FAIL " odoo.log && exit 1 || echo "Tests OK"
-        continue-on-error: true  # Soft fail tant que le runner setup n'est pas stable
+               --log-level=test 2>&1 | tee /tmp/odoo.log
+          # Echec explicite si un test echoue ou si l'install plante
+          if grep -E "odoo\.tests.*(FAIL|ERROR)|Failed to (load|initialize)|odoo\.modules\.loading.*ERROR" /tmp/odoo.log; then
+            echo "::error::Des tests ont echoue ou l'install a plante"; exit 1
+          fi
+          echo "Install + tests OK"
 
   audit-links:
     name: Audit liens HTML (404 detection)
