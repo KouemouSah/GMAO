@@ -114,29 +114,6 @@ pip install matplotlib
 
 ---
 
-## ⚠️ Risques & mitigations (transparence)
-
-| Risque | Mitigation |
-|--------|------------|
-| Performance dashboard avec gros volume | Requêtes agrégées (`read_group`), indexation PostgreSQL, `store=True` sur computes coûteux, rendu Chart.js côté client |
-| Odoo 13 CE strict (pas d'Enterprise) | Zéro import depuis modules Enterprise vérifié |
-| Multi-société | `ir.rule` globales + champs `company_id` sur les modèles sensibles |
-| Adoption utilisateurs | Co-conception terrain en Phase 0 |
-
----
-
-## 🧱 Dette technique connue (transparence)
-
-| Dette | Description | Roadmap |
-|---|---|---|
-| **Nommage mixte `gmao.*` / `maintenance.*`** | Les modèles cœur sont `gmao.equipment/request/team` (pas de collision : le module natif `maintenance` n'est pas une dépendance) ; d'autres gardent le préfixe `maintenance.*` (héritage). Nommage à uniformiser. | v3.0 |
-| **Fichiers JS/CSS orphelins** | `maintenance_request_widgets.js/.css` subsistent après le retrait du widget StateHistory (Fix #3) — code mort à nettoyer. | v2.1 |
-| **JS legacy (Widget/jQuery, Odoo 13)** | Tableau de bord + widgets custom (split-view documents, graphique consommation) en API Widget Odoo 13. Migration OWL 2 pour Odoo 16+. | Odoo 17/19 migration |
-| **Graphiques absents des PDF** | Les rapports PDF sont en tableaux ; les graphiques restent à l'écran (Chart.js). Rendu image serveur (matplotlib) prévu. | next |
-| **Tests unitaires limités** | ~11 tests `TransactionCase` (install + workflow). Couverture à étendre (wizards, reports, scoring). | v2.1 — extension de la suite |
-
----
-
 ## ✅ Déjà livré dans la v13.0.2.x 
 
 Rapport d'intervention structuré (codes panne + phrases-types), **analyse de récurrence des pannes**,

@@ -9,12 +9,12 @@ on:
 jobs:
   lint-python:
     name: Python lint (flake8 + black)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.7"
+          python-version: "3.8"
       - name: Install linters
         run: pip install flake8 black==22.3.0
       - name: flake8 (E9, F63, F7, F82 = erreurs critiques)
@@ -36,12 +36,12 @@ jobs:
 
   validate-xml:
     name: Validation XML (parse + manifest)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.7"
+          python-version: "3.8"
       - name: Validate all XML files
         run: |
           python - <<'PY'
@@ -64,7 +64,7 @@ jobs:
 
   module-install:
     name: Odoo install + tests (TransactionCase)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     services:
       postgres:
         image: postgres:13
@@ -82,7 +82,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.7"
+          python-version: "3.8"
       - name: Install Odoo 13 + dependencies
         run: |
           pip install --upgrade pip wheel
@@ -104,7 +104,7 @@ jobs:
 
   audit-links:
     name: Audit liens HTML (404 detection)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Check sitemap.xml references real files
