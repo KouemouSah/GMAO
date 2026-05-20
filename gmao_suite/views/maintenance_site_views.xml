@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue formulaire -->
+    <record id="view_maintenance_site_form" model="ir.ui.view">
+        <field name="name">maintenance.site.form</field>
+        <field name="model">maintenance.site</field>
+        <field name="arch" type="xml">
+            <form string="Site de maintenance">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom du site"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="city_id"/>
+                            <field name="state_id"/>
+                            <field name="country_id"/>
+                        </group>
+                        <group>
+                            <field name="address"/>
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                            <field name="distance_from_office"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue liste -->
+    <record id="view_maintenance_site_tree" model="ir.ui.view">
+        <field name="name">maintenance.site.tree</field>
+        <field name="model">maintenance.site</field>
+        <field name="arch" type="xml">
+            <tree string="Sites de maintenance">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="city_id"/>
+                <field name="state_id"/>
+                <field name="country_id"/>
+                <field name="distance_from_office"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue recherche -->
+    <record id="view_maintenance_site_search" model="ir.ui.view">
+        <field name="name">maintenance.site.search</field>
+        <field name="model">maintenance.site</field>
+        <field name="arch" type="xml">
+            <search string="Recherche de sites">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="city_id"/>
+                <field name="state_id"/>
+                <field name="country_id"/>
+                <filter string="Sites actifs" name="active" domain="[('active', '=', True)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="Ville" name="group_by_city" context="{'group_by': 'city_id'}"/>
+                    <filter string="État/Région" name="group_by_state" context="{'group_by': 'state_id'}"/>
+                    <filter string="Pays" name="group_by_country" context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+ 
+        <!-- Vue de recherche pour le rapport des sites de maintenance -->
+    <record id="view_maintenance_site_report_search" model="ir.ui.view">
+        <field name="name">maintenance.site.report.search</field>
+        <field name="model">maintenance.site</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Sites de Maintenance">
+                <!-- Champs de recherche -->
+                <field name="name"/>
+                <field name="code"/>
+                <field name="city_id"/>
+                <field name="state_id"/>
+                <field name="country_id"/>
+                <!-- Filtre pour les sites actifs -->
+                <filter string="Actif" name="active" domain="[('active', '=', True)]"/>
+                <!-- Options de regroupement -->
+                <group expand="0" string="Group By">
+                    <filter string="Ville" name="group_by_city" context="{'group_by': 'city_id'}"/>
+                    <filter string="État/Région" name="group_by_state" context="{'group_by': 'state_id'}"/>
+                    <filter string="Pays" name="group_by_country" context="{'group_by': 'country_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vue de liste pour le rapport des sites de maintenance -->
+    <record id="view_maintenance_site_report_tree" model="ir.ui.view">
+        <field name="name">maintenance.site.report.tree</field>
+        <field name="model">maintenance.site</field>
+        <field name="arch" type="xml">
+            <tree string="Rapport Sites de Maintenance">
+                <!-- Champs à afficher dans la vue liste -->
+                <field name="code"/>
+                <field name="name"/>
+                <field name="city_id"/>
+                <field name="state_id"/>
+                <field name="country_id"/>
+                <field name="latitude"/>
+                <field name="longitude"/>
+                <field name="distance_from_office"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- V1 : Vue Kanban Sites avec lien Google Maps cliquable (V2) -->
+    <record id="view_maintenance_site_kanban" model="ir.ui.view">
+        <field name="name">maintenance.site.kanban</field>
+        <field name="model">maintenance.site</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="city_id"/>
+                <field name="country_id"/>
+                <field name="address"/>
+                <field name="latitude"/>
+                <field name="longitude"/>
+                <field name="distance_from_office"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                    <small class="text-muted"><field name="code"/></small>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div><i class="fa fa-map-marker"/> <field name="city_id"/>, <field name="country_id"/></div>
+                                <div t-if="record.address.raw_value">
+                                    <small class="text-muted"><field name="address"/></small>
+                                </div>
+                                <div t-if="record.latitude.raw_value and record.longitude.raw_value" class="mt-2">
+                                    <i class="fa fa-globe text-muted"/>
+                                    <field name="latitude"/>, <field name="longitude"/>
+                                </div>
+                                <div t-if="record.distance_from_office.raw_value" class="mt-1">
+                                    <i class="fa fa-road text-muted"/>
+                                    <field name="distance_from_office"/> km du bureau
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- V2 : bouton "Voir sur Google Maps" injecte en haut du form site -->
+    <record id="view_maintenance_site_form_inherit_map" model="ir.ui.view">
+        <field name="name">maintenance.site.form.map</field>
+        <field name="model">maintenance.site</field>
+        <field name="inherit_id" ref="view_maintenance_site_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_open_google_maps"
+                            string="Google Maps"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-map-marker"
+                            attrs="{'invisible': ['|', ('latitude', '=', 0), ('longitude', '=', 0)]}"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_maintenance_site" model="ir.actions.act_window">
+        <field name="name">Sites de maintenance</field>
+        <field name="res_model">maintenance.site</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+
+    <!-- Form-RAPPORT metier site (lecture seule) : KPI operationnels/financiers
+         + detail par equipement + impression PDF. Ouvert au clic sur une ligne. -->
+    <record id="view_site_report_form" model="ir.ui.view">
+        <field name="name">maintenance.site.report.form</field>
+        <field name="model">maintenance.site</field>
+        <field name="arch" type="xml">
+            <form string="Rapport site" create="false" edit="false">
+                <header>
+                    <button name="%(action_report_site)d" type="action"
+                            string="Imprimer le rapport (PDF)" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                        <h3 class="text-muted">
+                            <field name="code"/> — <field name="city_id"/>
+                        </h3>
+                    </div>
+                    <field name="report_currency_id" invisible="1"/>
+                    <group>
+                        <group string="Activité maintenance">
+                            <field name="report_nb_equipment"/>
+                            <field name="report_nb_requests"/>
+                            <field name="report_pct_preventive"/>
+                            <field name="report_downtime_total"/>
+                        </group>
+                        <group string="Performance &amp; coûts">
+                            <field name="report_avg_mtbf"/>
+                            <field name="report_avg_mttr"/>
+                            <field name="report_total_cost"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Équipements du site">
+                            <field name="equipment_ids" nolabel="1" readonly="1">
+                                <tree decoration-warning="replacement_recommended and state!='scrapped'"
+                                      decoration-muted="state=='scrapped'" create="false" edit="false">
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="category_id"/>
+                                    <field name="state"/>
+                                    <field name="maintenance_count"/>
+                                    <field name="maintenance_cost_total" sum="Coût cumulé"/>
+                                    <field name="maintenance_cost_ratio" string="Ratio %"/>
+                                    <field name="replacement_recommended" string="À remplacer"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action de fenêtre pour le rapport des sites de maintenance -->
+    <record id="action_maintenance_site_report" model="ir.actions.act_window">
+        <field name="name">Rapport Sites de Maintenance</field>
+        <field name="res_model">maintenance.site</field>
+        <field name="view_mode">tree,form</field>
+        <!-- Clic ligne -> form-RAPPORT metier (KPI + detail equipements), pas
+             le form site editable. -->
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'tree', 'view_id': ref('view_maintenance_site_report_tree')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'form', 'view_id': ref('view_site_report_form')})]"/>
+        <field name="search_view_id" ref="view_maintenance_site_report_search"/>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun site de maintenance défini
+            </p>
+        </field>
+    </record>
+
+</odoo>

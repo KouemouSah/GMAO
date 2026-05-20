@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Refonte rapport Contrat de maintenance : design pro + KPIs ROI + alerte fin -->
+    <template id="report_maintenance_contract_document">
+        <t t-call="web.external_layout">
+            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)"/>
+            <div class="page">
+                <!-- En-tete avec etat colore -->
+                <div class="row mb-4">
+                    <div class="col-8">
+                        <h2 style="margin:0;">Contrat de maintenance
+                            <small class="text-muted">N° <span t-field="doc.name"/></small>
+                        </h2>
+                    </div>
+                    <div class="col-4 text-right">
+                        <span t-att-class="'badge badge-pill p-2 badge-' + {'draft':'secondary','active':'success','expired':'warning','cancelled':'danger'}.get(doc.state,'secondary')">
+                            <span t-field="doc.state"/>
+                        </span>
+                        <span t-if="doc.expiration_status == 'expiring_soon'" class="badge badge-warning ml-1">
+                            <i class="fa fa-warning"/> Expiration proche
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Bloc Client + Dates -->
+                <div class="row">
+                    <div class="col-6">
+                        <h4 style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                            <i class="fa fa-user"/> Client
+                        </h4>
+                        <table class="table table-sm table-borderless">
+                            <tr><td><strong>Raison sociale</strong></td><td><span t-field="doc.partner_id"/></td></tr>
+                            <tr><td><strong>Type contrat</strong></td><td><span t-field="doc.type"/></td></tr>
+                            <tr><td><strong>Responsable</strong></td><td><span t-field="doc.responsible_id"/></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-6">
+                        <h4 style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                            <i class="fa fa-calendar"/> Periode de validite
+                        </h4>
+                        <table class="table table-sm table-borderless">
+                            <tr><td><strong>Debut</strong></td><td><span t-field="doc.start_date"/></td></tr>
+                            <tr><td><strong>Fin</strong></td><td><span t-field="doc.end_date"/></td></tr>
+                            <tr><td><strong>Jours restants</strong></td>
+                                <td>
+                                    <span t-attf-class="badge badge-#{doc.remaining_days &lt; 30 and 'warning' or 'info'}">
+                                        <span t-field="doc.remaining_days"/> jours
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Montants avec monetary widget -->
+                <h4 class="mt-4" style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                    <i class="fa fa-money"/> Engagement financier
+                </h4>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="card text-center bg-light">
+                            <div class="card-body p-2">
+                                <small class="text-muted">Montant total</small>
+                                <h3 style="margin:0; color:#875A7B;">
+                                    <span t-field="doc.total_amount"
+                                          t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card text-center" style="background-color:#28a745; color:white;">
+                            <div class="card-body p-2">
+                                <small>Mensuel</small>
+                                <h3 style="margin:0;">
+                                    <span t-field="doc.monthly_amount"
+                                          t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"/>
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equipements couverts -->
+                <h4 class="mt-4" style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                    <i class="fa fa-wrench"/> Equipements couverts (<span t-esc="len(doc.equipment_ids)"/>)
+                </h4>
+                <table t-if="doc.equipment_ids" class="table table-sm table-striped">
+                    <thead style="background-color:#875A7B; color:white;">
+                        <tr>
+                            <th>Code</th>
+                            <th>Nom</th>
+                            <th>Categorie</th>
+                            <th>Site</th>
+                            <th>Numero de serie</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="doc.equipment_ids" t-as="equipment">
+                            <td><span t-field="equipment.code"/></td>
+                            <td><span t-field="equipment.name"/></td>
+                            <td><span t-field="equipment.category_id"/></td>
+                            <td><span t-field="equipment.site_id"/></td>
+                            <td><span t-field="equipment.serial_number"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p t-if="not doc.equipment_ids" class="text-muted">Aucun equipement couvert par ce contrat.</p>
+
+                <!-- Notes -->
+                <h4 class="mt-4" style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                    <i class="fa fa-file-text"/> Notes
+                </h4>
+                <div class="card mb-3"><div class="card-body">
+                    <p t-field="doc.note"/>
+                    <p t-if="not doc.note" class="text-muted">-</p>
+                </div></div>
+
+                <!-- Signatures -->
+                <div class="row mt-5">
+                    <div class="col-6">
+                        <p><strong>Signature client</strong></p>
+                        <p class="text-muted"><span t-field="doc.partner_id.name"/></p>
+                        <div style="border-bottom:1px solid #000; height:60px;"/>
+                    </div>
+                    <div class="col-6">
+                        <p><strong>Signature fournisseur</strong></p>
+                        <p class="text-muted"><span t-field="doc.responsible_id.name"/></p>
+                        <div style="border-bottom:1px solid #000; height:60px;"/>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_maintenance_contract">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="gmao_suite.report_maintenance_contract_document" t-lang="doc.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_maintenance_contract" model="ir.actions.report">
+        <field name="name">Contrat de Maintenance</field>
+        <field name="model">maintenance.contract</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">gmao_suite.report_maintenance_contract</field>
+        <field name="report_file">gmao_suite.report_maintenance_contract</field>
+        <field name="print_report_name">'Contrat - %s' % (object.name or 'nouveau')</field>
+        <field name="binding_model_id" ref="model_maintenance_contract"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Liste agrégée -->
+    <template id="report_maintenance_contracts_list">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>Portefeuille contrats de maintenance</h2>
+                    <p class="text-muted">Edite le <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y')"/></p>
+                    <table class="table table-sm table-striped">
+                        <thead style="background-color:#875A7B; color:white;">
+                            <tr>
+                                <th>Reference</th>
+                                <th>Client</th>
+                                <th>Type</th>
+                                <th>Debut</th>
+                                <th>Fin</th>
+                                <th class="text-right">Montant total</th>
+                                <th>Etat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="docs" t-as="contract">
+                                <td><span t-field="contract.name"/></td>
+                                <td><span t-field="contract.partner_id.name"/></td>
+                                <td><span t-field="contract.type"/></td>
+                                <td><span t-field="contract.start_date"/></td>
+                                <td><span t-field="contract.end_date"/></td>
+                                <td class="text-right">
+                                    <span t-field="contract.total_amount"
+                                          t-options="{'widget': 'monetary', 'display_currency': contract.currency_id}"/>
+                                </td>
+                                <td><span t-field="contract.state"/></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight:bold; border-top:2px solid #000;">
+                                <td colspan="5" class="text-right">TOTAL :</td>
+                                <td class="text-right">
+                                    <span t-esc="sum(d.total_amount for d in docs)"
+                                          t-options="{'widget': 'monetary', 'display_currency': docs[:1].currency_id}"/>
+                                </td>
+                                <td/>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_maintenance_contract_list" model="ir.actions.report">
+        <field name="name">Liste des Contrats de Maintenance</field>
+        <field name="model">maintenance.contract</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">gmao_suite.report_maintenance_contracts_list</field>
+        <field name="report_file">gmao_suite.report_maintenance_contracts_list</field>
+        <field name="print_report_name">'Liste des Contrats de Maintenance'</field>
+        <field name="binding_model_id" ref="model_maintenance_contract"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

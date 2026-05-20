@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Mise à jour du rapport d'analyse des demandes de maintenance -->
+        <record id="action_report_maintenance_request_analysis" model="ir.actions.report">
+            <field name="name">Rapport d'analyse des demandes de maintenance</field>
+            <field name="model">gmao.request</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">gmao_suite.report_maintenance_request_analysis_template</field>
+            <field name="report_file">gmao_suite.report_maintenance_request_analysis</field>
+            <field name="print_report_name">'Analyse des demandes de maintenance - %s'</field>
+            <field name="binding_model_id" ref="gmao_suite.model_gmao_request"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="gmao_suite.paperformat_euro_landscape"/>
+        </record>
+
+        <template id="report_maintenance_request_analysis_template">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <t t-set="docs" t-value="docs.with_context(lang=lang)"/>
+                    <t t-set="data" t-value="data or {}"/>
+
+                    <!-- Amélioration du titre du rapport avec cadre et informations centrées -->
+                    <div class="page" style="font-family: Arial, sans-serif;">
+                        <div style="text-align: center; border: 2px solid #000; border-radius: 15px; padding: 10px;">
+                             <h1 style="margin: 0; font-size: 24px;">Rapport d'analyse des demandes de maintenance</h1>
+							<div style="text-align: center; margin-top: 5px;">
+                            <hr style="border: 1px solid #000; width: 90%; margin: auto;"></hr>
+                            <p style="margin: 0; font-size: 14px;">
+                                Utilisateur: <span t-esc="env.user.name"/> |
+                                Date et heure: <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M:%S')"/> |
+                                Période: <span t-esc="data.get('report_period_from', 'N/A')"/> - <span t-esc="data.get('report_period_to', 'N/A')"/>
+                            </p>
+                        </div>
+                        </div>
+                        
+
+                        <!-- Conteneur principal pour les graphiques et tableaux -->
+                        <!-- Utilisation d'une grille CSS pour disposer les graphiques en 2 colonnes -->
+                        <!-- Disposition des graphiques avec une table -->
+<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <tr>
+        <td style="width: 50%; vertical-align: top;">
+            <!-- Graphique 1 : Évolution du nombre d'interventions -->
+            <div style="margin-right: 10px;">
+                <h3 style="text-align: center;">Évolution du nombre d'interventions</h3>
+                <div style="border: 1px solid #ddd; border-radius: 10px; padding: 10px;">
+                    <img t-att-src="'data:image/png;base64,%s' % docs._get_graph_image_line()" style="width: 100%; height: 300px;"/>
+                </div>
+                <div class="notes" style="margin-top: 10px;">
+                    <strong>Légende :</strong>
+                    <p>Nombre d'interventions par mois, montrant les tendances sur une période donnée.</p>
+                </div>
+            </div>
+        </td>
+        <td style="width: 50%; vertical-align: top;">
+            <!-- Graphique 2 : Nombre de demandes par état -->
+            <div>
+                <h3 style="text-align: center;">Nombre de demandes par État</h3>
+                <div style="border: 1px solid #ddd; border-radius: 10px; padding: 10px;">
+                    <img t-att-src="'data:image/png;base64,%s' % docs._get_graph_image_bar()" style="width: 100%; height: 300px;"/>
+                </div>
+                <div class="notes" style="margin-top: 10px;">
+                    <strong>Légende :</strong>
+                    <p>Répartition des états des demandes de maintenance (Nouvelles, En cours, Terminées, etc.).</p>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td style="width: 50%; vertical-align: top;">
+            <!-- Graphique 3 : Suivi du temps moyen par type de maintenance -->
+            <div style="margin-right: 10px;">
+                <h3 style="text-align: center;">Suivi du temps moyen par type de maintenance</h3>
+                <div style="border: 1px solid #ddd; border-radius: 10px; padding: 10px;">
+                    <img t-att-src="'data:image/png;base64,%s' % docs._get_graph_image_execution_time(data.get('report_period_from'), data.get('report_period_to'))" style="width: 100%; height: 300px;"/>
+                </div>
+                <div class="notes" style="margin-top: 10px;">
+                    <strong>Légende :</strong>
+                    <p>Temps moyen d'exécution par type de maintenance (corrective, préventive, etc.).</p>
+                </div>
+            </div>
+        </td>
+        <td style="width: 50%; vertical-align: top;">
+            <!-- Graphique 4 : Répartition des types de maintenance -->
+            <div>
+                <h3 style="text-align: center;">Répartition des types de maintenance</h3>
+                <div style="border: 1px solid #ddd; border-radius: 10px; padding: 10px;">
+                    <img t-att-src="'data:image/png;base64,%s' % docs._get_graph_image_pie()" style="width: 100%; height: 300px;"/>
+                </div>
+                <div class="notes" style="margin-top: 10px;">
+                    <strong>Légende :</strong>
+                    <p>Pourcentage des interventions par type de maintenance (corrective, préventive, etc.).</p>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+                        <!-- Tableau des Indicateurs Clés -->
+                        <!-- Tableau des Indicateurs Clés -->
+<div style="width: 100%; margin-top: 20px;">
+    <h3 style="text-align: center;">Analyse des Indicateurs Clés par Équipe/Priorité/Type de Maintenance</h3>
+    <div style="border: 1px solid #ddd; border-radius: 10px; padding: 10px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <!-- Entête avec fond vert clair -->
+            <thead style="background-color: #c2eaba;">
+                <tr>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Équipe</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Équipement</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Type de Maintenance</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Priorité</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">Durée Moyenne (heures)</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">MTTR Moyen</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">MTBF Moyen</th>
+                </tr>
+            </thead>
+            <tbody>
+                <t t-foreach="docs.get_pivot_data()" t-as="row">
+                    <!-- Calcul de la couleur de fond -->
+                    <t t-set="bg_color" t-value="'#ffffff' if row['index'] % 2 == 0 else '#f0f0f0'"/>
+                    <tr>
+                        <!-- Première cellule -->
+                        <td t-att-style="'border: 1px solid #ddd; padding: 8px; background-color: %s;' % bg_color">
+                            <t t-esc="row.get('team', 'N/A')"/>
+                        </td>
+                        <!-- Répéter pour les autres cellules -->
+                        <td t-att-style="'border: 1px solid #ddd; padding: 8px; background-color: %s;' % bg_color">
+                            <t t-esc="row.get('equipment', 'N/A')"/>
+                        </td>
+                        <td t-att-style="'border: 1px solid #ddd; padding: 8px; background-color: %s;' % bg_color">
+                            <t t-esc="row.get('maintenance_type', 'N/A')"/>
+                        </td>
+                        <td t-att-style="'border: 1px solid #ddd; padding: 8px; background-color: %s;' % bg_color">
+                            <t t-esc="row.get('priority', 'N/A')"/>
+                        </td>
+                        <td t-att-style="'border: 1px solid #ddd; padding: 8px; text-align: right; background-color: %s;' % bg_color">
+                            <t t-esc="'%.2f' % row.get('avg_duration', 0.0)"/>
+                        </td>
+                        <td t-att-style="'border: 1px solid #ddd; padding: 8px; text-align: right; background-color: %s;' % bg_color">
+                            <t t-esc="'%.2f' % row.get('avg_mttr', 0.0)"/>
+                        </td>
+                        <td t-att-style="'border: 1px solid #ddd; padding: 8px; text-align: right; background-color: %s;' % bg_color">
+                            <t t-esc="'%.2f' % row.get('avg_mtbf', 0.0)"/>
+                        </td>
+                    </tr>
+                </t>
+            </tbody>
+        </table>
+    </div>
+    <div class="notes" style="margin-top: 10px;">
+        <strong>Analyse :</strong>
+        <p>Analyse détaillée des indicateurs clés par équipe, équipement, type de maintenance et priorité.</p>
+    </div>
+</div>
+
+
+                        <!-- Section des Observations Générales -->
+                        <div style="width: 100%; margin-top: 20px;">
+                            <h3 style="text-align: center;">Observations générales</h3>
+                            <div style="border: 1px solid #ddd; border-radius: 10px; padding: 10px;">
+                                <p>Observations générales sur les demandes de maintenance.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <template id="report_maintenance_request_analysis_assets" inherit_id="web.report_assets_common">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/web/static/lib/chart/Chart.js"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>

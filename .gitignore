@@ -1,0 +1,78 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Odoo
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS / system
+desktop.ini
+*.lnk
+
+# Logs
+*.log
+odoo.log
+
+# Backups / temp
+*.bak
+*.tmp
+*.orig
+
+# Sensitive (jamais commit)
+*.env
+.env
+.env.*
+business_data.md
+
+# Scripts locaux Windows pour install Odoo (specifiques a l'environnement dev de l'auteur)
+*_ADMIN.bat
+DELETE_OLD_GMAO_ADMIN.bat
+SETUP_GMAO_ADMIN.bat
+INSTALL_MATPLOTLIB_ADMIN.bat
+
+# Cleanup SQL local (ne JAMAIS pousser - destructif)
+_cleanup_gmao.sql
+# Scripts diagnostics SQL locaux
+_check*.sql
+
+# Exclusions de publication (depot public) : plans internes, scripts locaux, SQL
+.claude/
+*.bat
+*.sql

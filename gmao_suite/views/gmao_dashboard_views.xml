@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!--
+            Vue form du Dashboard professionnel.
+            Layout : cards Bootstrap colorees, sections par theme (etats / type
+            / performance / couts / ressources), 2 tables HTML (top equipements,
+            activite recente).
+            Approche pragmatique Odoo 13 OWL 1 : pas de widget OWL custom mais
+            une form view stylee qui utilise les fields computes du
+            TransientModel gmao.dashboard.
+        -->
+        <record id="view_gmao_dashboard_form" model="ir.ui.view">
+            <field name="name">gmao.dashboard.form</field>
+            <field name="model">gmao.dashboard</field>
+            <field name="arch" type="xml">
+                <form string="Tableau de bord GMAO" create="false" edit="false" delete="false">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1 style="color:#875A7B;">
+                                <i class="fa fa-dashboard"/> Tableau de bord GMAO Suite
+                            </h1>
+                            <p class="text-muted">Vue d'ensemble en temps reel - cliquez sur une carte pour ouvrir la liste filtree.</p>
+                        </div>
+
+                        <!-- =========================================== -->
+                        <!-- BLOC 1 : Operations en cours / urgences     -->
+                        <!-- =========================================== -->
+                        <h3 style="border-bottom:2px solid #875A7B; padding-bottom:5px; margin-top:20px;">
+                            <i class="fa fa-bolt text-danger"/> Operations &amp; urgences
+                        </h3>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="card text-center" style="background-color:#dc3545; color:white; cursor:pointer;">
+                                    <div class="card-body p-3">
+                                        <button name="action_view_overdue" type="object" class="btn btn-link p-0" style="color:white; text-decoration:none;">
+                                            <small>EN RETARD</small>
+                                            <h2 style="margin:0;"><field name="overdue_count" nolabel="1"/></h2>
+                                            <small>cliquer pour ouvrir</small>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center" style="background-color:#ffc107; color:#212529;">
+                                    <div class="card-body p-3">
+                                        <button name="action_view_open" type="object" class="btn btn-link p-0" style="color:#212529; text-decoration:none;">
+                                            <small>OUVERTES</small>
+                                            <h2 style="margin:0;">
+                                                <field name="new_count" nolabel="1" widget="integer"/> +
+                                                <field name="to_validate_count" nolabel="1" widget="integer"/> +
+                                                <field name="in_progress_count" nolabel="1" widget="integer"/>
+                                            </h2>
+                                            <small>nouvelles + a valider + en cours</small>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center" style="background-color:#28a745; color:white;">
+                                    <div class="card-body p-3">
+                                        <button name="action_view_done" type="object" class="btn btn-link p-0" style="color:white; text-decoration:none;">
+                                            <small>TERMINEES</small>
+                                            <h2 style="margin:0;"><field name="done_count" nolabel="1"/></h2>
+                                            <small>cumul historique</small>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-3">
+                                        <small class="text-muted">TOTAL DEMANDES</small>
+                                        <h2 style="margin:0; color:#875A7B;"><field name="total_requests" nolabel="1"/></h2>
+                                        <small><field name="cancel_count" nolabel="1"/> annulees</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- =========================================== -->
+                        <!-- BLOC 2 : Repartition par type               -->
+                        <!-- =========================================== -->
+                        <h3 style="border-bottom:2px solid #875A7B; padding-bottom:5px; margin-top:25px;">
+                            <i class="fa fa-pie-chart"/> Repartition par type
+                        </h3>
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="card text-center" style="background-color:#28a745; color:white;">
+                                    <div class="card-body p-3">
+                                        <small>PREVENTIVES</small>
+                                        <h2 style="margin:0;"><field name="preventive_count" nolabel="1"/></h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="card text-center" style="background-color:#fd7e14; color:white;">
+                                    <div class="card-body p-3">
+                                        <small>CORRECTIVES</small>
+                                        <h2 style="margin:0;"><field name="corrective_count" nolabel="1"/></h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-3">
+                                        <small class="text-muted">% PROACTIF</small>
+                                        <h2 style="margin:0; color:#28a745;">
+                                            <field name="pct_preventive" nolabel="1" widget="float"/>%
+                                        </h2>
+                                        <small>preventif / (preventif + correctif)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- =========================================== -->
+                        <!-- BLOC 3 : KPIs performance                   -->
+                        <!-- =========================================== -->
+                        <h3 style="border-bottom:2px solid #875A7B; padding-bottom:5px; margin-top:25px;">
+                            <i class="fa fa-line-chart"/> Performance metier
+                        </h3>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-3">
+                                        <small class="text-muted">MTTR moyen</small>
+                                        <h2 style="margin:0;"><field name="avg_mttr" nolabel="1"/> h</h2>
+                                        <small>Mean Time To Repair</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-3">
+                                        <small class="text-muted">MTBF moyen</small>
+                                        <h2 style="margin:0;"><field name="avg_mtbf" nolabel="1"/> h</h2>
+                                        <small>Mean Time Between Failures</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center" style="background-color:#17a2b8; color:white;">
+                                    <div class="card-body p-3">
+                                        <small>DISPONIBILITE</small>
+                                        <h2 style="margin:0;"><field name="avg_availability" nolabel="1"/>%</h2>
+                                        <small>MTBF / (MTBF + MTTR)</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-3">
+                                        <small class="text-muted">DUREE MOY.</small>
+                                        <h2 style="margin:0;"><field name="avg_duration" nolabel="1"/> h</h2>
+                                        <small>par intervention</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- =========================================== -->
+                        <!-- BLOC 4 : Couts                              -->
+                        <!-- =========================================== -->
+                        <h3 style="border-bottom:2px solid #875A7B; padding-bottom:5px; margin-top:25px;">
+                            <i class="fa fa-eur"/> Couts maintenance
+                        </h3>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="card text-center" style="background-color:#875A7B; color:white;">
+                                    <div class="card-body p-3">
+                                        <small>MOIS COURANT</small>
+                                        <h2 style="margin:0;"><field name="total_cost_month" nolabel="1"/></h2>
+                                        <small>EUR depuis le 1er du mois</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-3">
+                                        <small class="text-muted">ANNEE EN COURS</small>
+                                        <h2 style="margin:0;"><field name="total_cost_year" nolabel="1"/></h2>
+                                        <small>EUR cumul YTD</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-3">
+                                        <small class="text-muted">PIECES</small>
+                                        <h2 style="margin:0;"><field name="total_parts_cost" nolabel="1"/></h2>
+                                        <small>EUR pieces utilisees</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-3">
+                                        <small class="text-muted">MAIN D'OEUVRE</small>
+                                        <h2 style="margin:0;"><field name="total_labor_cost" nolabel="1"/></h2>
+                                        <small>EUR cout horaire</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- =========================================== -->
+                        <!-- BLOC 5 : Ressources                          -->
+                        <!-- =========================================== -->
+                        <h3 style="border-bottom:2px solid #875A7B; padding-bottom:5px; margin-top:25px;">
+                            <i class="fa fa-cubes"/> Ressources
+                        </h3>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-2">
+                                        <small class="text-muted">Sites</small>
+                                        <h3 style="margin:0;"><field name="sites_count" nolabel="1"/></h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-2">
+                                        <small class="text-muted">Equipements</small>
+                                        <h3 style="margin:0;"><field name="equipment_count" nolabel="1"/></h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center" style="background-color:#fd7e14; color:white; cursor:pointer;">
+                                    <div class="card-body p-2">
+                                        <button name="action_view_equipment_in_repair" type="object" class="btn btn-link p-0" style="color:white; text-decoration:none;">
+                                            <small>EN REPARATION</small>
+                                            <h3 style="margin:0;"><field name="equipment_in_repair" nolabel="1"/></h3>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-2">
+                                        <small class="text-muted">Equipes / Contrats</small>
+                                        <h3 style="margin:0;">
+                                            <field name="teams_count" nolabel="1"/> / <field name="contracts_active" nolabel="1"/>
+                                        </h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- =========================================== -->
+                        <!-- BLOC 6 : Top equipements + activite          -->
+                        <!-- =========================================== -->
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <h4 style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                    <i class="fa fa-trophy"/> Top 5 equipements (cout)
+                                </h4>
+                                <field name="top_equipment_html" nolabel="1" widget="html"/>
+                            </div>
+                            <div class="col-6">
+                                <h4 style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                    <i class="fa fa-history"/> Activite recente
+                                </h4>
+                                <field name="recent_activity_html" nolabel="1" widget="html"/>
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Action LEGACY (act_window form/kanban gmao.dashboard).        -->
+        <!-- Conservee : on NE PEUT PAS changer le modele d'un xml_id      -->
+        <!-- existant (Odoo => ParseError). Plus rattachee au menu, sert   -->
+        <!-- de fallback.                                                  -->
+        <!-- ============================================================ -->
+        <record id="action_gmao_dashboard" model="ir.actions.act_window">
+            <field name="name">Tableau de bord GMAO (classique)</field>
+            <field name="res_model">gmao.dashboard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_gmao_dashboard_form"/>
+            <field name="target">current</field>
+            <field name="context">{}</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Action PRO : client action JS plein-ecran (Chart.js + KPI    -->
+        <!-- live via gmao.dashboard.get_dashboard_data). NOUVEL xml_id    -->
+        <!-- pour eviter le conflit de modele avec l'action legacy.       -->
+        <!-- ============================================================ -->
+        <record id="action_gmao_dashboard_client" model="ir.actions.client">
+            <field name="name">Tableau de bord GMAO</field>
+            <field name="tag">gmao_dashboard</field>
+            <field name="target">current</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Vues kanban/pivot/graph sur gmao.request (preservees pour    -->
+        <!-- l'ancien menu et utilisateurs qui les preferent)              -->
+        <!-- ============================================================ -->
+        <record id="view_gmao_dashboard_kanban" model="ir.ui.view">
+            <field name="name">gmao.request.dashboard.kanban</field>
+            <field name="model">gmao.request</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_dashboard" default_group_by="state" create="false">
+                    <field name="state"/>
+                    <field name="name"/>
+                    <field name="priority"/>
+                    <field name="maintenance_type"/>
+                    <field name="equipment_id"/>
+                    <field name="schedule_date"/>
+                    <field name="is_overdue"/>
+                    <field name="technician_id"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_card #{record.is_overdue.raw_value ? 'oe_kanban_color_2' : ''}">
+                                <div class="o_kanban_record_top">
+                                    <strong><field name="name"/></strong>
+                                    <field name="priority" widget="priority"/>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div><field name="equipment_id"/></div>
+                                    <div t-if="record.technician_id.value">
+                                        <i class="fa fa-user"/> <field name="technician_id"/>
+                                    </div>
+                                    <div t-if="record.schedule_date.raw_value">
+                                        <i class="fa fa-calendar"/> <field name="schedule_date"/>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <span t-if="record.is_overdue.raw_value" class="badge badge-danger">EN RETARD</span>
+                                    <span t-attf-class="badge badge-#{record.maintenance_type.raw_value === 'preventive' ? 'success' : 'warning'}">
+                                        <field name="maintenance_type"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Enregistre les assets du dashboard pro dans web.assets_backend :
+        - Chart.js (lib native Odoo 13, non chargee par defaut en backend)
+        - le client action JS gmao_dashboard.js
+        - la feuille de style gmao_dashboard.css
+    -->
+    <template id="assets_backend_gmao_dashboard" inherit_id="web.assets_backend" name="GMAO Dashboard assets">
+        <xpath expr="//script[last()]" position="after">
+            <script type="text/javascript" src="/web/static/lib/Chart/Chart.js"/>
+            <script type="text/javascript" src="/gmao_suite/static/src/js/gmao_dashboard.js"/>
+            <script type="text/javascript" src="/gmao_suite/static/src/js/gmao_connection_guard.js"/>
+            <script type="text/javascript" src="/gmao_suite/static/src/js/gmao_attachment_preview.js"/>
+            <script type="text/javascript" src="/gmao_suite/static/src/js/gmao_consumption_chart.js"/>
+        </xpath>
+        <xpath expr="//link[last()]" position="after">
+            <link rel="stylesheet" type="text/css" href="/gmao_suite/static/src/css/gmao_dashboard.css"/>
+            <link rel="stylesheet" type="text/css" href="/gmao_suite/static/src/css/gmao_attachment_preview.css"/>
+        </xpath>
+    </template>
+</odoo>

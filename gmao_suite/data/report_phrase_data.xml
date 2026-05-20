@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Phrases-types par defaut (partagees : company_id=False). noupdate=1 :
+         editables/supprimables par l'utilisateur sans ecrasement au -u. -->
+    <data noupdate="1">
+        <!-- Symptomes -->
+        <record id="phrase_sym_bruit" model="gmao.report.phrase">
+            <field name="category">symptom</field><field name="code">SYM-BRT</field>
+            <field name="name">Bruit anormal</field>
+            <field name="text">Bruit anormal constaté en fonctionnement.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_sym_fuite" model="gmao.report.phrase">
+            <field name="category">symptom</field><field name="code">SYM-FUI</field>
+            <field name="name">Fuite</field>
+            <field name="text">Fuite détectée (fluide / pression).</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_sym_arret" model="gmao.report.phrase">
+            <field name="category">symptom</field><field name="code">SYM-ARR</field>
+            <field name="name">Arrêt / ne démarre pas</field>
+            <field name="text">L'équipement s'arrête ou ne démarre plus.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_sym_surchauffe" model="gmao.report.phrase">
+            <field name="category">symptom</field><field name="code">SYM-SUR</field>
+            <field name="name">Surchauffe</field>
+            <field name="text">Surchauffe / température anormale.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Causes racines -->
+        <record id="phrase_cause_usure" model="gmao.report.phrase">
+            <field name="category">cause</field><field name="code">CAU-USU</field>
+            <field name="name">Usure normale</field>
+            <field name="text">Usure normale de la pièce en fin de vie.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_cause_lub" model="gmao.report.phrase">
+            <field name="category">cause</field><field name="code">CAU-LUB</field>
+            <field name="name">Défaut de lubrification</field>
+            <field name="text">Manque ou défaut de lubrification.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_cause_alim" model="gmao.report.phrase">
+            <field name="category">cause</field><field name="code">CAU-ALI</field>
+            <field name="name">Problème d'alimentation</field>
+            <field name="text">Problème d'alimentation électrique / instabilité.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_cause_op" model="gmao.report.phrase">
+            <field name="category">cause</field><field name="code">CAU-OP</field>
+            <field name="name">Mauvaise utilisation</field>
+            <field name="text">Mauvaise utilisation / paramétrage incorrect.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Travaux realises -->
+        <record id="phrase_work_remp" model="gmao.report.phrase">
+            <field name="category">work</field><field name="code">TRV-REM</field>
+            <field name="name">Remplacement de pièce</field>
+            <field name="text">Remplacement de la pièce défectueuse.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_work_net" model="gmao.report.phrase">
+            <field name="category">work</field><field name="code">TRV-NET</field>
+            <field name="name">Nettoyage</field>
+            <field name="text">Nettoyage et dépoussiérage de l'équipement.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_work_reg" model="gmao.report.phrase">
+            <field name="category">work</field><field name="code">TRV-REG</field>
+            <field name="name">Réglage / calibrage</field>
+            <field name="text">Réglage et calibrage des paramètres.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_work_serr" model="gmao.report.phrase">
+            <field name="category">work</field><field name="code">TRV-SER</field>
+            <field name="name">Resserrage / fixation</field>
+            <field name="text">Resserrage des connexions / fixations.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Recommandations -->
+        <record id="phrase_reco_prev" model="gmao.report.phrase">
+            <field name="category">recommendation</field><field name="code">REC-PRV</field>
+            <field name="name">Renforcer le préventif</field>
+            <field name="text">Renforcer la maintenance préventive sur cet équipement.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_reco_surv" model="gmao.report.phrase">
+            <field name="category">recommendation</field><field name="code">REC-SUR</field>
+            <field name="name">Surveiller la pièce</field>
+            <field name="text">Surveiller l'usure de la pièce lors des prochaines visites.</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="phrase_reco_remp" model="gmao.report.phrase">
+            <field name="category">recommendation</field><field name="code">REC-REM</field>
+            <field name="name">Envisager le remplacement</field>
+            <field name="text">Envisager le remplacement de l'équipement (coût/fiabilité).</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

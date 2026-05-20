@@ -1,0 +1,127 @@
+name: CI - GMAO Suite
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-python:
+    name: Python lint (flake8 + black)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.7"
+      - name: Install linters
+        run: pip install flake8 black==22.3.0
+      - name: flake8 (E9, F63, F7, F82 = erreurs critiques)
+        run: |
+          flake8 gmao_suite/ \
+            --select=E9,F63,F7,F82 \
+            --show-source \
+            --statistics
+      - name: flake8 (warnings non bloquants)
+        continue-on-error: true
+        run: |
+          flake8 gmao_suite/ \
+            --max-line-length=120 \
+            --extend-ignore=E501,W503,E203 \
+            --statistics
+      - name: black --check
+        continue-on-error: true
+        run: black --check --diff gmao_suite/
+
+  validate-xml:
+    name: Validation XML (parse + manifest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.7"
+      - name: Validate all XML files
+        run: |
+          python - <<'PY'
+          import os, sys, xml.etree.ElementTree as ET
+          errors = 0
+          for root, _, files in os.walk('gmao_suite'):
+              for fn in files:
+                  if fn.endswith('.xml'):
+                      path = os.path.join(root, fn)
+                      try: ET.parse(path)
+                      except Exception as e:
+                          print(f'XML ERROR {path}: {e}'); errors += 1
+          if errors:
+              print(f'\n{errors} XML errors found')
+              sys.exit(1)
+          print('All XML parse OK')
+          PY
+      - name: Validate __manifest__.py syntax
+        run: python -c "import ast; ast.parse(open('gmao_suite/__manifest__.py').read())"
+
+  module-install:
+    name: Odoo install + tests (TransactionCase)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.7"
+      - name: Install Odoo 13 + dependencies
+        run: |
+          pip install --upgrade pip wheel
+          pip install psycopg2-binary lxml passlib Pillow python-dateutil pytz werkzeug==0.16 \
+                      psutil reportlab gevent qrcode vobject decorator num2words python-stdnum \
+                      requests babel docutils freezegun jinja2 ofxparse libsass \
+                      Pillow PyYAML xlrd xlsxwriter polib idna chardet matplotlib
+          pip install odoo==13.0.post20230304 || pip install odoo  # version permissive
+      - name: Install + test module
+        run: |
+          PGPASSWORD=odoo psql -h localhost -U odoo -c "CREATE DATABASE gmao_test;"
+          odoo --addons-path=. -d gmao_test -i gmao_suite \
+               --db_host=localhost --db_user=odoo --db_password=odoo \
+               --test-enable --stop-after-init --without-demo=all \
+               --log-level=warn 2>&1 | tee odoo.log
+          # Echec si "FAIL" dans les tests
+          grep -E "^.*odoo.tests.* FAIL " odoo.log && exit 1 || echo "Tests OK"
+        continue-on-error: true  # Soft fail tant que le runner setup n'est pas stable
+
+  audit-links:
+    name: Audit liens HTML (404 detection)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check sitemap.xml references real files
+        run: |
+          python - <<'PY'
+          import re, os
+          with open('sitemap.xml') as f: s = f.read()
+          base = 'https://kouemousah.github.io/GMAO/'
+          urls = re.findall(r'<loc>([^<]+)</loc>', s)
+          missing = []
+          for url in urls:
+              rel = url.replace(base, '')
+              if rel == '': rel = 'index.html'
+              if not os.path.exists(rel):
+                  missing.append(rel)
+          if missing:
+              print('Missing files referenced in sitemap:', missing)
+              exit(1)
+          print(f'{len(urls)} URLs in sitemap, all files exist')
+          PY

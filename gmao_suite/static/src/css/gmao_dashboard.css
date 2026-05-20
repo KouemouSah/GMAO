@@ -1,0 +1,159 @@
+/* ====================================================================
+   Dashboard GMAO professionnel — design system compact (Odoo 13)
+   Objectifs : densite, vue quasi sans scroll, graphes garantis (canvas
+   dans wrapper a hauteur fixe), zero element coupe (root scrollable).
+   ==================================================================== */
+
+/* Flux normal : NE PAS utiliser position:absolute/inset:0 (cela recouvrait
+   la navbar Odoo). On laisse la zone d'action (.o_action_manager) gerer le
+   scroll ; le dashboard remplit en hauteur via min-height. */
+.o_gmao_dashboard {
+    min-height: 100%;
+    overflow-x: hidden;
+    padding: 12px 16px 24px;
+    background: #f4f5f7;
+    font-family: "Roboto", "Segoe UI", sans-serif;
+    color: #2b2b3a;
+}
+.o_gmao_dashboard.o_gmao_loading { opacity: 0.55; pointer-events: none; transition: opacity 0.15s ease; }
+.o_hidden { display: none !important; }
+
+/* ---------------- Header + filtres ---------------- */
+.o_gmao_header {
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: 10px; margin-bottom: 12px;
+}
+.o_gmao_title {
+    font-size: 18px; font-weight: 600; color: #875A7B;
+    display: flex; align-items: center; gap: 8px;
+}
+.o_gmao_title .fa { font-size: 20px; }
+.o_gmao_filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.o_gmao_filters .form-control {
+    width: auto; min-width: 130px; height: 32px;
+    font-size: 13px; display: inline-block;
+}
+.o_gmao_custom_dates { display: inline-flex; align-items: center; gap: 5px; }
+.o_gmao_custom_dates .form-control { min-width: 120px; }
+.o_gmao_dash { color: #888; }
+.o_gmao_refresh.btn { height: 32px; padding: 4px 12px; }
+
+/* ---------------- KPI cards (compactes, 1 rangee auto-fit) ---------------- */
+.o_gmao_kpi_grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px; margin-bottom: 14px;
+}
+@media (max-width: 1400px) { .o_gmao_kpi_grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 768px)  { .o_gmao_kpi_grid { grid-template-columns: repeat(2, 1fr); } }
+
+.o_gmao_kpi {
+    --accent: #875A7B;
+    background: #fff; border-radius: 8px;
+    padding: 10px 12px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.07);
+    border-left: 3px solid var(--accent);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    min-height: 64px;
+}
+.o_gmao_kpi_clickable { cursor: pointer; }
+.o_gmao_kpi_clickable:hover { transform: translateY(-2px); box-shadow: 0 5px 14px rgba(0,0,0,0.12); }
+.o_gmao_kpi_icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--accent); color: #fff; font-size: 16px; flex-shrink: 0;
+}
+.o_gmao_kpi_value { font-size: 21px; font-weight: 700; line-height: 1.05; color: #2b2b3a; }
+.o_gmao_kpi_label {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.3px;
+    color: #8a8a9a; margin-top: 1px; white-space: nowrap;
+}
+
+/* ---------------- Graphiques (grille dense) ---------------- */
+.o_gmao_charts_grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px; margin-bottom: 14px;
+}
+@media (max-width: 1100px) { .o_gmao_charts_grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px)  { .o_gmao_charts_grid { grid-template-columns: 1fr; } }
+
+.o_gmao_chart_card {
+    background: #fff; border-radius: 8px; padding: 10px 12px 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.07);
+    display: flex; flex-direction: column;
+}
+.o_gmao_chart_card_title {
+    font-size: 12px; font-weight: 600; color: #6b6b7b;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    margin-bottom: 6px;
+}
+.o_gmao_chart_wide { grid-column: span 2; }
+@media (max-width: 700px) { .o_gmao_chart_wide { grid-column: 1; } }
+
+/* WRAPPER CANVAS = la cle : hauteur fixe + position relative.
+   Chart.js (responsive + maintainAspectRatio:false) rend exactement
+   dans cette boite. Sans ca : canvas a 0px ou croissance infinie. */
+.o_gmao_canvas_wrap { position: relative; height: 190px; width: 100%; }
+.o_gmao_canvas_wrap canvas {
+    position: absolute; top: 0; left: 0;
+    width: 100% !important; height: 100% !important;
+}
+.o_gmao_chart_err {
+    display: flex; align-items: center; justify-content: center;
+    height: 190px; color: #b00020; font-size: 13px; text-align: center;
+}
+
+/* ---------------- Bas : ressources + activite ---------------- */
+.o_gmao_bottom_grid {
+    display: grid; grid-template-columns: 1fr 2fr; gap: 12px;
+}
+@media (max-width: 900px) { .o_gmao_bottom_grid { grid-template-columns: 1fr; } }
+.o_gmao_panel {
+    background: #fff; border-radius: 8px; padding: 12px 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.07);
+}
+.o_gmao_panel_title {
+    font-size: 13px; font-weight: 600; color: #875A7B;
+    margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid #eee;
+}
+.o_gmao_panel_title .fa { margin-right: 5px; }
+.o_gmao_resource_row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 4px; border-bottom: 1px solid #f0f0f3;
+}
+.o_gmao_resource_row:last-child { border-bottom: none; }
+.o_gmao_resource_row span { color: #555; font-size: 13px; }
+.o_gmao_resource_row strong { font-size: 15px; }
+.o_gmao_resource_row.o_gmao_kpi_clickable { cursor: pointer; }
+.o_gmao_resource_row.o_gmao_kpi_clickable:hover { background: #faf7fa; border-radius: 6px; }
+
+/* ---------------- Table activite recente (triable) ---------------- */
+.o_gmao_recent_table { width: 100%; border-collapse: collapse; }
+.o_gmao_recent_table th {
+    text-align: left; font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.3px; color: #8a8a9a; padding: 5px 8px;
+    border-bottom: 2px solid #eee; cursor: pointer; user-select: none;
+    white-space: nowrap;
+}
+.o_gmao_recent_table th:hover { color: #875A7B; }
+.o_gmao_recent_table th .fa { font-size: 9px; margin-left: 3px; opacity: 0.6; }
+.o_gmao_recent_table td {
+    padding: 6px 8px; border-bottom: 1px solid #f0f0f3; font-size: 12.5px;
+}
+.o_gmao_recent_row { cursor: pointer; }
+.o_gmao_recent_row:hover { background: #faf7fa; }
+
+/* ---------------- Badges etats ---------------- */
+.o_gmao_badge {
+    display: inline-block; padding: 2px 8px; border-radius: 11px;
+    font-size: 10.5px; font-weight: 600; color: #fff;
+}
+.o_gmao_state_new          { background: #6c757d; }
+.o_gmao_state_to_validate  { background: #ffc107; color: #212529; }
+.o_gmao_state_in_progress  { background: #17a2b8; }
+.o_gmao_state_repaired     { background: #20c997; }
+.o_gmao_state_done         { background: #28a745; }
+.o_gmao_state_cancel       { background: #adb5bd; }
+.o_gmao_state_overdue      { background: #dc3545; margin-left: 4px; }

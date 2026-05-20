@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- R1 : refonte rapport bon d'intervention - design pro + KPIs + signatures -->
+        <record id="action_report_maintenance_request" model="ir.actions.report">
+            <field name="name">Bon d'intervention</field>
+            <field name="model">gmao.request</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">gmao_suite.report_maintenance_request_template</field>
+            <field name="report_file">gmao_suite.report_maintenance_request</field>
+            <field name="print_report_name">'Intervention %s - %s' % (object.name, object.equipment_id.name or '')</field>
+            <field name="binding_model_id" ref="model_gmao_request"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="report_maintenance_request_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <!-- En-tete : titre + reference + state badge -->
+                            <div class="row mb-4">
+                                <div class="col-8">
+                                    <h2 style="margin:0;">
+                                        Bon d'intervention
+                                        <small class="text-muted">N° <span t-field="o.name"/></small>
+                                    </h2>
+                                    <p class="text-muted mb-0">
+                                        Demande emise le <span t-field="o.request_date" t-options="{'widget': 'datetime'}"/>
+                                    </p>
+                                </div>
+                                <div class="col-4 text-right">
+                                    <span t-att-class="'badge badge-pill p-2 badge-' + {'new':'secondary','to_validate':'info','in_progress':'warning','repaired':'primary','done':'success','cancel':'danger'}.get(o.state,'secondary')">
+                                        <span t-field="o.state"/>
+                                    </span>
+                                    <br/>
+                                    <span class="badge badge-light mt-1">
+                                        <t t-if="o.priority == '4'">Tres haute</t>
+                                        <t t-elif="o.priority == '3'">Haute</t>
+                                        <t t-elif="o.priority == '2'">Normale</t>
+                                        <t t-elif="o.priority == '1'">Basse</t>
+                                        <t t-else="">Tres basse</t>
+                                        <t t-if="o.maintenance_type == 'preventive'"> | Preventive</t>
+                                        <t t-else=""> | Corrective</t>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Bloc Equipement + Client -->
+                            <div class="row mt-4">
+                                <div class="col-6">
+                                    <h4 style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                        <i class="fa fa-wrench"/> Equipement
+                                    </h4>
+                                    <table class="table table-sm table-borderless">
+                                        <tr><td><strong>Nom</strong></td><td><span t-field="o.equipment_id.name"/></td></tr>
+                                        <tr><td><strong>Code</strong></td><td><span t-field="o.equipment_id.code"/></td></tr>
+                                        <tr><td><strong>Categorie</strong></td><td><span t-field="o.category_id"/></td></tr>
+                                        <tr><td><strong>Site</strong></td><td><span t-field="o.site_id.name"/></td></tr>
+                                    </table>
+                                </div>
+                                <div class="col-6">
+                                    <h4 style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                        <i class="fa fa-user"/> Client / Technicien
+                                    </h4>
+                                    <table class="table table-sm table-borderless">
+                                        <tr><td><strong>Client</strong></td><td><span t-field="o.user_id.name"/></td></tr>
+                                        <tr><td><strong>Technicien</strong></td><td><span t-field="o.technician_id.name"/></td></tr>
+                                        <tr><td><strong>Equipe</strong></td><td><span t-field="o.team_id"/></td></tr>
+                                        <tr t-if="o.contract_id"><td><strong>Contrat</strong></td><td><span t-field="o.contract_id"/></td></tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <h4 class="mt-4" style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                <i class="fa fa-file-text"/> Description &amp; observations
+                            </h4>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <p><strong>Probleme signale :</strong></p>
+                                    <p t-field="o.description"/>
+                                    <p t-if="o.observations"><strong>Observations technicien :</strong></p>
+                                    <p t-if="o.observations" t-field="o.observations"/>
+                                </div>
+                            </div>
+
+                            <!-- Workflow timeline -->
+                            <h4 class="mt-4" style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                <i class="fa fa-history"/> Chronologie
+                            </h4>
+            <!-- Chronologie compacte : 4 dates sur 2 lignes (2x2) -->
+                            <table class="table table-sm" style="margin-bottom:0;">
+                                <tr>
+                                    <td style="width:15%;"><strong>Demandee le</strong></td>
+                                    <td style="width:35%;"><span t-field="o.request_date" t-options="{'widget': 'datetime'}"/></td>
+                                    <td style="width:15%;"><strong>Planifiee le</strong></td>
+                                    <td style="width:35%;">
+                                        <span t-if="o.schedule_date" t-field="o.schedule_date" t-options="{'widget': 'datetime'}"/>
+                                        <span t-if="not o.schedule_date" class="text-muted">—</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Demarree le</strong></td>
+                                    <td>
+                                        <span t-if="o.start_date" t-field="o.start_date" t-options="{'widget': 'datetime'}"/>
+                                        <span t-if="not o.start_date" class="text-muted">—</span>
+                                    </td>
+                                    <td><strong>Cloturee le</strong></td>
+                                    <td>
+                                        <span t-if="o.close_date" t-field="o.close_date" t-options="{'widget': 'datetime'}"/>
+                                        <span t-if="not o.close_date" class="text-muted">—</span>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Pieces utilisees -->
+                            <h4 class="mt-4" style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                <i class="fa fa-cogs"/> Pieces utilisees
+                            </h4>
+                            <table t-if="o.parts_used_ids" class="table table-sm table-striped">
+                                <thead style="background-color:#875A7B; color:white;">
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th class="text-right">Quantite</th>
+                                        <th class="text-right">Prix unitaire</th>
+                                        <th class="text-right">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.parts_used_ids" t-as="part">
+                                        <td><span t-field="part.product_id.name"/></td>
+                                        <td class="text-right"><span t-field="part.quantity"/></td>
+                                        <td class="text-right">
+                                            <span t-field="part.unit_cost" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="part.total_cost" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p t-if="not o.parts_used_ids" class="text-muted">Aucune piece utilisee.</p>
+
+                            <!-- KPI + couts -->
+                            <h4 class="mt-4" style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                <i class="fa fa-line-chart"/> Indicateurs de performance &amp; couts
+                            </h4>
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body p-2">
+                                            <small class="text-muted">Duree</small>
+                                            <h3 style="margin:0; color:#875A7B;">
+                                                <span t-field="o.duration" t-options="{'widget': 'float_time'}"/>
+                                            </h3>
+                                            <small>heures</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body p-2">
+                                            <small class="text-muted">Temps d'arret</small>
+                                            <h3 style="margin:0; color:#dc3545;">
+                                                <span t-field="o.downtime" t-options="{'widget': 'float_time'}"/>
+                                            </h3>
+                                            <small>heures</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body p-2">
+                                            <small class="text-muted">MTTR</small>
+                                            <h3 style="margin:0;">
+                                                <span t-field="o.mttr"/>
+                                            </h3>
+                                            <small>heures</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="card text-center" style="background-color:#28a745; color:white;">
+                                        <div class="card-body p-2">
+                                            <small>Cout total</small>
+                                            <h3 style="margin:0;">
+                                                <span t-field="o.total_cost" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                            </h3>
+                                            <small>
+                                                Pieces : <span t-field="o.total_parts_cost" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                                | MO : <span t-field="o.labor_cost" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Signatures -->
+                            <div class="row mt-5">
+                                <div class="col-6">
+                                    <p><strong>Signature technicien</strong></p>
+                                    <p class="text-muted"><span t-field="o.technician_id.name"/></p>
+                                    <div style="border-bottom:1px solid #000; height:60px;"/>
+                                    <p class="text-muted small mt-1">Date : ____ / ____ / ________</p>
+                                </div>
+                                <div class="col-6">
+                                    <p><strong>Signature client / Bon pour accord</strong></p>
+                                    <p class="text-muted"><span t-field="o.user_id.name"/></p>
+                                    <div style="border-bottom:1px solid #000; height:60px;"/>
+                                    <p class="text-muted small mt-1">Date : ____ / ____ / ________</p>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

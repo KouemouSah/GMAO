@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_gmao_failure_code_tree" model="ir.ui.view">
+        <field name="name">gmao.failure.code.tree</field>
+        <field name="model">gmao.failure.code</field>
+        <field name="arch" type="xml">
+            <tree string="Codes panne / intervention" editable="bottom">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="applies_to"/>
+                <field name="failure_mode"/>
+                <field name="recommended_action" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_gmao_failure_code_form" model="ir.ui.view">
+        <field name="name">gmao.failure.code.form</field>
+        <field name="model">gmao.failure.code</field>
+        <field name="arch" type="xml">
+            <form string="Code panne">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="name"/>
+                            <field name="applies_to"/>
+                            <field name="failure_mode"/>
+                        </group>
+                        <group>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Action recommandée">
+                        <field name="recommended_action" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_gmao_failure_code_search" model="ir.ui.view">
+        <field name="name">gmao.failure.code.search</field>
+        <field name="model">gmao.failure.code</field>
+        <field name="arch" type="xml">
+            <search string="Codes panne">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="failure_mode"/>
+                <filter string="Correctif" name="f_corrective" domain="[('applies_to', 'in', ('corrective', 'both'))]"/>
+                <filter string="Préventif" name="f_preventive" domain="[('applies_to', 'in', ('preventive', 'both'))]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter string="S'applique à" name="group_by_applies" context="{'group_by': 'applies_to'}"/>
+                    <filter string="Mode de défaillance" name="group_by_mode"
+                            context="{'group_by': 'failure_mode'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_gmao_failure_code" model="ir.actions.act_window">
+        <field name="name">Codes panne</field>
+        <field name="res_model">gmao.failure.code</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_gmao_failure_code_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Créer le premier code panne</p>
+            <p>Catalogue normalisé des pannes pour l'analyse de récurrence et la prédiction.</p>
+        </field>
+    </record>
+</odoo>

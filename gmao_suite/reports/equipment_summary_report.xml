@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- ================================================================ -->
+        <!-- P5.1 : Dossier equipement (PDF, multi-doc). Distinct du rapport   -->
+        <!-- d'analyse de remplacement (action_report_equipment_replacement).  -->
+        <!-- Valeurs MTBF/MTTR/downtime via AbstractModel _get_report_values.  -->
+        <!-- ================================================================ -->
+        <record id="action_report_equipment_summary" model="ir.actions.report">
+            <field name="name">Dossier équipement</field>
+            <field name="model">gmao.equipment</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">gmao_suite.report_equipment_summary_document</field>
+            <field name="report_file">gmao_suite.report_equipment_summary</field>
+            <field name="print_report_name">'Dossier %s' % (object.code or object.name or '')</field>
+            <field name="binding_model_id" ref="model_gmao_equipment"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="report_equipment_summary_document">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <t t-set="st" t-value="stats[o.id]"/>
+                        <t t-set="client" t-value="o._report_client()"/>
+                        <div class="page">
+                            <div class="row mb-3">
+                                <div class="col-8">
+                                    <h2 style="margin:0;">Dossier équipement</h2>
+                                    <p class="text-muted mb-0">
+                                        <span t-field="o.name"/>
+                                        <span t-if="o.code"> — <span t-field="o.code"/></span>
+                                    </p>
+                                    <p class="mb-0">
+                                        <strong t-if="client">Client : </strong>
+                                        <span t-if="client" t-field="client.name"/>
+                                        <strong t-if="not client">Société : </strong>
+                                        <span t-if="not client" t-field="o.company_id"/>
+                                    </p>
+                                </div>
+                                <div class="col-4 text-right">
+                                    <span t-if="o.replacement_recommended" class="badge badge-pill badge-danger p-2">À remplacer</span>
+                                    <span t-if="not o.replacement_recommended" class="badge badge-pill badge-success p-2">Opérationnel</span>
+                                </div>
+                            </div>
+
+                            <table class="table table-sm table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <td style="width:25%;"><strong>Catégorie</strong></td>
+                                        <td style="width:25%;"><span t-field="o.category_id"/></td>
+                                        <td style="width:25%;"><strong>Site</strong></td>
+                                        <td style="width:25%;"><span t-field="o.site_id"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Date d'achat</strong></td>
+                                        <td><span t-field="o.purchase_date"/></td>
+                                        <td><strong>Fin de garantie</strong></td>
+                                        <td><span t-field="o.warranty_expiration_date"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Équipe</strong></td>
+                                        <td><span t-field="o.maintenance_team_id"/></td>
+                                        <td><strong>État</strong></td>
+                                        <td><span t-field="o.state"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h4 class="mt-4">Indicateurs maintenance</h4>
+                            <table class="table table-sm table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <td>Nombre d'interventions</td>
+                                        <td class="text-right"><span t-field="o.maintenance_count"/></td>
+                                        <td>Temps d'arrêt cumulé (h)</td>
+                                        <td class="text-right"><span t-esc="st['downtime_total']"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td>MTBF moyen (h)</td>
+                                        <td class="text-right"><span t-esc="st['avg_mtbf']"/></td>
+                                        <td>MTTR moyen (h)</td>
+                                        <td class="text-right"><span t-esc="st['avg_mttr']"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h4 class="mt-4">Coûts</h4>
+                            <table class="table table-sm table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <td>Valeur d'achat</td>
+                                        <td class="text-right">
+                                            <span t-field="o.cost" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Coût cumulé de maintenance</td>
+                                        <td class="text-right">
+                                            <span t-field="o.maintenance_cost_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Coût de maintenance (12 mois)</td>
+                                        <td class="text-right">
+                                            <span t-field="o.annual_maintenance_cost" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ratio coût / valeur</td>
+                                        <td class="text-right">
+                                            <strong><span t-esc="'%.1f' % o.maintenance_cost_ratio"/>%</strong>
+                                            <span class="text-muted"> (seuil <span t-esc="'%.0f' % st['threshold']"/>%)</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div t-if="o.replacement_recommended" class="alert alert-warning mt-3" role="alert">
+                                <strong>Remplacement recommandé</strong> : le ratio coût/valeur dépasse le seuil.
+                                Voir le rapport « Analyse de remplacement » pour le détail décisionnel.
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

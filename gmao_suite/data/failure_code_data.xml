@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Catalogue de codes panne / intervention par defaut (partage entre
+         societes : company_id=False). noupdate=1 : modifiable par l'utilisateur
+         sans ecrasement au -u. applies_to filtre selon le type de maintenance :
+         le technicien en preventif voit les ACTIVITES preventives, en correctif
+         les codes PANNE. -->
+    <data noupdate="1">
+
+        <!-- ============ CORRECTIF : codes panne ============ -->
+        <record id="failure_code_mec_usure" model="gmao.failure.code">
+            <field name="code">MEC-USU</field>
+            <field name="name">Usure mécanique (roulement, courroie, joint)</field>
+            <field name="failure_mode">wear</field>
+            <field name="applies_to">corrective</field>
+            <field name="company_id" eval="False"/>
+            <field name="recommended_action">Remplacer la pièce usée ; vérifier lubrification et alignement.</field>
+        </record>
+        <record id="failure_code_mec_casse" model="gmao.failure.code">
+            <field name="code">MEC-CAS</field>
+            <field name="name">Rupture / casse mécanique</field>
+            <field name="failure_mode">mechanical</field>
+            <field name="applies_to">corrective</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_mec_vibration" model="gmao.failure.code">
+            <field name="code">MEC-VIB</field>
+            <field name="name">Vibration / desserrage / désalignement</field>
+            <field name="failure_mode">mechanical</field>
+            <field name="applies_to">corrective</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_ele_court" model="gmao.failure.code">
+            <field name="code">ELE-CC</field>
+            <field name="name">Court-circuit / surcharge électrique</field>
+            <field name="failure_mode">electrical</field>
+            <field name="applies_to">corrective</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_ele_moteur" model="gmao.failure.code">
+            <field name="code">ELE-MOT</field>
+            <field name="name">Défaillance moteur / bobinage</field>
+            <field name="failure_mode">electrical</field>
+            <field name="applies_to">corrective</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_hyd_fuite" model="gmao.failure.code">
+            <field name="code">HYD-FUI</field>
+            <field name="name">Fuite hydraulique / perte de pression</field>
+            <field name="failure_mode">hydraulic</field>
+            <field name="applies_to">corrective</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_pne_fuite" model="gmao.failure.code">
+            <field name="code">PNE-FUI</field>
+            <field name="name">Fuite pneumatique / vérin défectueux</field>
+            <field name="failure_mode">pneumatic</field>
+            <field name="applies_to">corrective</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_elec_capteur" model="gmao.failure.code">
+            <field name="code">ELEC-CAP</field>
+            <field name="name">Capteur / automate / logiciel défaillant</field>
+            <field name="failure_mode">electronic</field>
+            <field name="applies_to">corrective</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_op_erreur" model="gmao.failure.code">
+            <field name="code">OP-ERR</field>
+            <field name="name">Erreur d'utilisation / mauvais paramétrage</field>
+            <field name="failure_mode">operator</field>
+            <field name="applies_to">corrective</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_ext_alim" model="gmao.failure.code">
+            <field name="code">EXT-ALI</field>
+            <field name="name">Cause externe (alimentation, environnement)</field>
+            <field name="failure_mode">external</field>
+            <field name="applies_to">corrective</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- ============ PREVENTIF : activites planifiees ============ -->
+        <record id="failure_code_prev_ins" model="gmao.failure.code">
+            <field name="code">PREV-INS</field>
+            <field name="name">Inspection / contrôle visuel</field>
+            <field name="failure_mode">none</field>
+            <field name="applies_to">preventive</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_prev_lub" model="gmao.failure.code">
+            <field name="code">PREV-LUB</field>
+            <field name="name">Lubrification / graissage</field>
+            <field name="failure_mode">none</field>
+            <field name="applies_to">preventive</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_prev_rem" model="gmao.failure.code">
+            <field name="code">PREV-REM</field>
+            <field name="name">Remplacement préventif (pièce d'usure)</field>
+            <field name="failure_mode">none</field>
+            <field name="applies_to">preventive</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_prev_net" model="gmao.failure.code">
+            <field name="code">PREV-NET</field>
+            <field name="name">Nettoyage / dépoussiérage</field>
+            <field name="failure_mode">none</field>
+            <field name="applies_to">preventive</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_prev_reg" model="gmao.failure.code">
+            <field name="code">PREV-REG</field>
+            <field name="name">Réglage / calibrage / étalonnage</field>
+            <field name="failure_mode">none</field>
+            <field name="applies_to">preventive</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_prev_tst" model="gmao.failure.code">
+            <field name="code">PREV-TST</field>
+            <field name="name">Test / mesure / essai fonctionnel</field>
+            <field name="failure_mode">none</field>
+            <field name="applies_to">preventive</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="failure_code_prev_ras" model="gmao.failure.code">
+            <field name="code">PREV-RAS</field>
+            <field name="name">Contrôle conforme — aucune anomalie</field>
+            <field name="failure_mode">none</field>
+            <field name="applies_to">preventive</field>
+            <field name="company_id" eval="False"/>
+            <field name="recommended_action">Intervention préventive réalisée, aucune anomalie constatée.</field>
+        </record>
+
+        <!-- ============ COMMUN ============ -->
+        <record id="failure_code_aut" model="gmao.failure.code">
+            <field name="code">AUT-000</field>
+            <field name="name">Autre (préciser dans la cause / les travaux)</field>
+            <field name="failure_mode">other</field>
+            <field name="applies_to">both</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

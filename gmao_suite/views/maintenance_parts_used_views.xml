@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue formulaire piece utilisee (refonte ERP : cout/vente, nature, facturation) -->
+    <record id="view_maintenance_parts_used_form" model="ir.ui.view">
+        <field name="name">maintenance.parts.used.form</field>
+        <field name="model">maintenance.parts.used</field>
+        <field name="priority" eval="16"/>
+        <field name="arch" type="xml">
+            <form string="Piece de maintenance">
+                <header>
+                    <button name="action_reserve" string="Reserver" type="object" states="draft" class="oe_highlight"/>
+                    <button name="action_use" string="Consommer" type="object" states="draft,reserved" class="oe_highlight"/>
+                    <button name="action_invoice" string="Refacturer au client" type="object"
+                            attrs="{'invisible': ['|', '|', ('part_nature', '!=', 'billable'), ('is_invoiced', '=', True), ('state', '!=', 'used')]}"
+                            class="btn-secondary"/>
+                    <button name="action_cancel" string="Annuler" type="object" states="draft,reserved,used"/>
+                    <button name="action_draft" string="Remettre en brouillon" type="object" states="cancelled"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,reserved,used"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_invoice" type="object" class="oe_stat_button" icon="fa-pencil-square-o"
+                                attrs="{'invisible': [('is_invoiced', '=', False)]}">
+                            <field name="invoice_id" widget="statinfo" string="Facture"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Piece &amp; intervention">
+                            <field name="product_id" options="{'no_open': True}"/>
+                            <field name="quantity"/>
+                            <field name="part_nature" widget="radio"/>
+                            <field name="intervention_id" options="{'no_create': True}"/>
+                            <field name="technician_id" options="{'no_create': True}"/>
+                            <field name="serial_number"/>
+                        </group>
+                        <group string="Valorisation">
+                            <field name="unit_cost" widget="monetary"/>
+                            <field name="total_cost" widget="monetary" class="oe_subtotal_footer_separator"/>
+                            <field name="unit_sale_price" widget="monetary"
+                                   attrs="{'invisible': [('part_nature', '!=', 'billable')]}"/>
+                            <field name="total_sale_price" widget="monetary"
+                                   attrs="{'invisible': [('part_nature', '!=', 'billable')]}"/>
+                            <field name="margin" widget="monetary"
+                                   attrs="{'invisible': [('part_nature', '!=', 'billable')]}"/>
+                            <field name="is_invoiced" invisible="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Stock">
+                            <field name="stock_location_id"/>
+                            <field name="current_stock"/>
+                            <field name="stock_move_id" readonly="1" attrs="{'invisible': [('stock_move_id', '=', False)]}"/>
+                        </group>
+                        <group string="Dates">
+                            <field name="usage_date"/>
+                            <field name="withdrawal_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue liste -->
+    <record id="view_maintenance_parts_used_tree" model="ir.ui.view">
+        <field name="name">maintenance.parts.used.tree</field>
+        <field name="model">maintenance.parts.used</field>
+        <field name="arch" type="xml">
+            <tree string="Pieces de maintenance"
+                  decoration-info="state == 'draft'"
+                  decoration-warning="state == 'reserved'"
+                  decoration-success="state == 'used'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="part_nature"/>
+                <field name="quantity"/>
+                <field name="unit_cost" widget="monetary" optional="hide"/>
+                <field name="total_cost" widget="monetary" sum="Cout total"/>
+                <field name="total_sale_price" widget="monetary" sum="Refacturable" optional="show"/>
+                <field name="current_stock" optional="hide"/>
+                <field name="withdrawal_date"/>
+                <field name="technician_id"/>
+                <field name="intervention_id"/>
+                <field name="is_invoiced" widget="boolean_toggle" optional="show"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Recherche -->
+    <record id="view_maintenance_parts_used_search" model="ir.ui.view">
+        <field name="name">maintenance.parts.used.search</field>
+        <field name="model">maintenance.parts.used</field>
+        <field name="arch" type="xml">
+            <search string="Recherche de pieces">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="intervention_id"/>
+                <field name="technician_id"/>
+                <field name="withdrawal_date"/>
+                <separator/>
+                <filter string="Consommables" name="consumable" domain="[('part_nature', '=', 'consumable')]"/>
+                <filter string="Refacturables" name="billable" domain="[('part_nature', '=', 'billable')]"/>
+                <filter string="Refacturables non facturees" name="to_invoice"
+                        domain="[('part_nature', '=', 'billable'), ('is_invoiced', '=', False), ('state', '=', 'used')]"/>
+                <separator/>
+                <filter string="Brouillon" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Reservees" name="reserved" domain="[('state', '=', 'reserved')]"/>
+                <filter string="Utilisees" name="used" domain="[('state', '=', 'used')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Nature" name="groupby_nature" context="{'group_by': 'part_nature'}"/>
+                    <filter string="Etat" name="groupby_state" context="{'group_by': 'state'}"/>
+                    <filter string="Produit" name="groupby_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Technicien" name="groupby_technician" context="{'group_by': 'technician_id'}"/>
+                    <filter string="Intervention" name="groupby_intervention" context="{'group_by': 'intervention_id'}"/>
+                    <filter string="Mois de retrait" name="groupby_withdrawal_month" context="{'group_by': 'withdrawal_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Graph -->
+    <record id="view_maintenance_parts_used_graph" model="ir.ui.view">
+        <field name="name">maintenance.parts.used.graph</field>
+        <field name="model">maintenance.parts.used</field>
+        <field name="arch" type="xml">
+            <graph string="Analyse des pieces utilisees" type="bar">
+                <field name="product_id"/>
+                <field name="quantity" type="measure"/>
+                <field name="total_cost" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Pivot -->
+    <record id="view_maintenance_parts_used_pivot" model="ir.ui.view">
+        <field name="name">maintenance.parts.used.pivot</field>
+        <field name="model">maintenance.parts.used</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des pieces utilisees">
+                <field name="product_id" type="row"/>
+                <field name="part_nature" type="col"/>
+                <field name="quantity" type="measure"/>
+                <field name="total_cost" type="measure"/>
+                <field name="total_sale_price" type="measure"/>
+                <field name="margin" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_maintenance_parts_used" model="ir.actions.act_window">
+        <field name="name">Pieces de maintenance</field>
+        <field name="res_model">maintenance.parts.used</field>
+        <field name="view_mode">tree,form,graph,pivot</field>
+        <field name="search_view_id" ref="view_maintenance_parts_used_search"/>
+        <field name="context">{'search_default_groupby_nature': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Creer votre premiere piece de maintenance</p>
+        </field>
+    </record>
+
+    <!-- P5.3 : ecran d'analyse pieces (pivot-first). Le menu Rapports pointe
+         ici (et n'ouvre plus le wizard d'emblee). L'impression periode reste
+         accessible via le menu Action -> 'Rapport des pieces utilisees'
+         (wizard binde sur le modele). -->
+    <record id="action_parts_used_analysis" model="ir.actions.act_window">
+        <field name="name">Analyse des pieces utilisees</field>
+        <field name="res_model">maintenance.parts.used</field>
+        <field name="view_mode">pivot,graph,tree,form</field>
+        <field name="search_view_id" ref="view_maintenance_parts_used_search"/>
+        <field name="context">{'search_default_groupby_nature': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucune piece utilisee sur la periode</p>
+            <p>Analyse des pieces (pivot/graphique). Pour un PDF par periode,
+               utiliser le menu Action &#8594; « Rapport des pieces utilisees ».</p>
+        </field>
+    </record>
+
+    <record id="action_maintenance_parts_allocation" model="ir.actions.act_window">
+        <field name="name">Allocation de pieces</field>
+        <field name="res_model">maintenance.parts.used</field>
+        <field name="view_mode">tree,form,graph,pivot</field>
+        <field name="search_view_id" ref="view_maintenance_parts_used_search"/>
+        <field name="domain">[('state', 'in', ('draft', 'reserved'))]</field>
+        <field name="context">{'search_default_draft': 1, 'search_default_reserved': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aucune piece a allouer</p>
+        </field>
+    </record>
+
+</odoo>

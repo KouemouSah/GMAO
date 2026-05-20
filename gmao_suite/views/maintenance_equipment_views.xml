@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue formulaire pour les équipements -->
+    <record id="view_maintenance_equipment_form" model="ir.ui.view">
+        <field name="name">maintenance.equipment.form</field>
+        <field name="model">gmao.equipment</field>
+        <field name="arch" type="xml">
+            <form string="Équipement">
+                <header>
+                    <button name="action_start_maintenance" string="Démarrer maintenance" type="object" attrs="{'invisible': [('state', '!=', 'operational')]}"/>
+                    <button name="action_end_maintenance" string="Terminer maintenance" type="object" attrs="{'invisible': [('state', '!=', 'in_repair')]}"/>
+                    <button name="action_scrap" string="Mettre au rebut" type="object" attrs="{'invisible': [('state', '=', 'scrapped')]}"/>
+                    <button name="action_send_replacement_report" type="object"
+                            string="Envoyer le rapport de remplacement" class="oe_highlight"
+                            attrs="{'invisible': [('replacement_recommended', '=', False)]}"/>
+                    <field name="state" widget="statusbar" statusbar_visible="operational,in_repair,standby,scrapped"/>
+                </header>
+                <sheet>
+                    <!-- V3 : Smart buttons (count maintenances, ouvertes, inspections) -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_maintenance" type="object" class="oe_stat_button" icon="fa-wrench">
+                            <field name="maintenance_count" widget="statinfo" string="Maintenances"/>
+                        </button>
+                        <button name="action_view_maintenance" type="object" class="oe_stat_button" icon="fa-exclamation-triangle"
+                                attrs="{'invisible': [('maintenance_open_count', '=', 0)]}"
+                                context="{'search_default_open': 1}">
+                            <field name="maintenance_open_count" widget="statinfo" string="Ouvertes"/>
+                        </button>
+                        <button name="action_view_maintenance" type="object" class="oe_stat_button" icon="fa-money">
+                            <field name="maintenance_cost_total" widget="statinfo" string="Coût cumulé"/>
+                        </button>
+                        <button name="action_send_replacement_report" type="object" class="oe_stat_button" icon="fa-recycle"
+                                attrs="{'invisible': [('replacement_recommended', '=', False)]}">
+                            <span class="o_stat_text text-warning">À remplacer</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Mis au rebut" bg_color="bg-danger"
+                            attrs="{'invisible': [('state', '!=', 'scrapped')]}"/>
+                    <widget name="web_ribbon" title="À remplacer" bg_color="bg-warning"
+                            attrs="{'invisible': ['|', ('replacement_recommended', '=', False), ('state', '=', 'scrapped')]}"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Nom de l'équipement"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="category_id"/>
+                            <field name="model"/>
+                            <field name="serial_number"/>
+                            <field name="vendor_id"/>
+                        </group>
+                        <group>
+                            <field name="site_id"/>
+                            <field name="location"/>
+                            <field name="maintenance_team_id"/>
+                            <field name="technician_user_id"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Informations techniques">
+                            <group>
+                                <group>
+                                    <field name="purchase_date"/>
+                                    <field name="warranty_expiration_date"/>
+                                    <field name="cost"/>
+                                    <field name="currency_id"/>
+                                </group>
+                                <group>
+                                    <field name="effective_date"/>
+                                    <field name="scrap_date"/>
+                                    <field name="period"/>
+                                    <field name="next_maintenance_date"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Coûts &amp; remplacement">
+                            <group>
+                                <group string="Coûts cumulés">
+                                    <field name="cost"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="maintenance_cost_total"/>
+                                    <field name="annual_maintenance_cost"/>
+                                </group>
+                                <group string="Décision remplacement">
+                                    <field name="maintenance_cost_ratio" widget="progressbar"/>
+                                    <field name="replacement_recommended" readonly="1"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-warning" role="alert"
+                                 attrs="{'invisible': [('replacement_recommended', '=', False)]}">
+                                <i class="fa fa-exclamation-triangle"/>
+                                Le coût cumulé de maintenance dépasse le seuil configuré :
+                                le remplacement de cet équipement est recommandé.
+                            </div>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue liste pour les équipements -->
+    <record id="view_maintenance_equipment_tree" model="ir.ui.view">
+        <field name="name">maintenance.equipment.tree</field>
+        <field name="model">gmao.equipment</field>
+        <field name="arch" type="xml">
+            <tree string="Équipements" decoration-danger="state=='in_repair'" decoration-muted="state=='scrapped'" decoration-warning="replacement_recommended and state!='scrapped'">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category_id"/>
+                <field name="site_id"/>
+                <field name="state"/>
+                <field name="maintenance_count"/>
+                <field name="maintenance_cost_ratio" string="Coût/valeur %" optional="show"/>
+                <field name="replacement_recommended" invisible="1"/>
+                <field name="next_maintenance_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vue de recherche pour les équipements -->
+    <record id="view_maintenance_equipment_search" model="ir.ui.view">
+        <field name="name">maintenance.equipment.search</field>
+        <field name="model">gmao.equipment</field>
+        <field name="arch" type="xml">
+            <search string="Recherche Équipements">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category_id"/>
+                <field name="site_id"/>
+                <field name="technician_user_id"/>
+                <filter string="Opérationnel" name="operational" domain="[('state', '=', 'operational')]"/>
+                <filter string="En réparation" name="in_repair" domain="[('state', '=', 'in_repair')]"/>
+                <filter string="Mis au rebut" name="scrapped" domain="[('state', '=', 'scrapped')]"/>
+                <separator/>
+                <filter string="À remplacer" name="to_replace" domain="[('replacement_recommended', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Catégorie" name="group_by_category" context="{'group_by': 'category_id'}"/>
+                    <filter string="Site" name="group_by_site" context="{'group_by': 'site_id'}"/>
+                    <filter string="État" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vue graphique pour les équipements -->
+    <record id="view_maintenance_equipment_graph" model="ir.ui.view">
+        <field name="name">maintenance.equipment.graph</field>
+        <field name="model">gmao.equipment</field>
+        <field name="arch" type="xml">
+            <graph string="Analyse des Équipements" type="bar">
+                <field name="category_id"/>
+                <field name="maintenance_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Vue pivot pour les équipements -->
+    <record id="view_maintenance_equipment_pivot" model="ir.ui.view">
+        <field name="name">maintenance.equipment.pivot</field>
+        <field name="model">gmao.equipment</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse des Équipements">
+                <field name="category_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="maintenance_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- V1 : Vue Kanban Equipements (carte avec couleur d'etat + smart count) -->
+    <record id="view_maintenance_equipment_kanban" model="ir.ui.view">
+        <field name="name">gmao.equipment.kanban</field>
+        <field name="model">gmao.equipment</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="state"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category_id"/>
+                <field name="site_id"/>
+                <field name="maintenance_count"/>
+                <field name="maintenance_open_count"/>
+                <field name="next_maintenance_date"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click #{kanban_color(record.state.raw_value)}">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <small class="o_kanban_record_subtitle text-muted">
+                                        <field name="code"/>
+                                    </small>
+                                </div>
+                                <field name="state" widget="label_selection"
+                                       options="{'classes': {'operational': 'success', 'in_repair': 'warning', 'standby': 'info', 'scrapped': 'danger'}}"/>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div t-if="record.category_id.value">
+                                    <i class="fa fa-tag"/> <field name="category_id"/>
+                                </div>
+                                <div t-if="record.site_id.value">
+                                    <i class="fa fa-map-marker"/> <field name="site_id"/>
+                                </div>
+                                <div t-if="record.next_maintenance_date.raw_value">
+                                    <i class="fa fa-calendar"/> Prochaine maintenance : <field name="next_maintenance_date"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <span class="badge badge-pill" t-if="record.maintenance_open_count.raw_value > 0">
+                                        <i class="fa fa-wrench"/> <field name="maintenance_open_count"/> ouvertes
+                                    </span>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <span class="text-muted">Total: <field name="maintenance_count"/></span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- Form-RAPPORT metier equipement (lecture seule) : KPI decision  -->
+    <!-- + chronologie des interventions. Utilise par les actions        -->
+    <!-- 'Rapport equipements' et 'Analyse remplacement' (clic ligne).   -->
+    <!-- ============================================================ -->
+    <record id="view_equipment_report_form" model="ir.ui.view">
+        <field name="name">gmao.equipment.report.form</field>
+        <field name="model">gmao.equipment</field>
+        <field name="arch" type="xml">
+            <form string="Dossier équipement" create="false" edit="false">
+                <header>
+                    <button name="%(action_report_equipment_summary)d" type="action"
+                            string="Imprimer le dossier (PDF)" class="oe_highlight"/>
+                    <button name="action_send_replacement_report" type="object"
+                            string="Envoyer le rapport de remplacement"
+                            attrs="{'invisible': [('replacement_recommended', '=', False)]}"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="À remplacer" bg_color="bg-warning"
+                            attrs="{'invisible': [('replacement_recommended', '=', False)]}"/>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                        <h3 class="text-muted"><field name="code"/></h3>
+                    </div>
+                    <group>
+                        <group string="Identification">
+                            <field name="category_id"/>
+                            <field name="site_id"/>
+                            <field name="maintenance_team_id"/>
+                            <field name="state"/>
+                        </group>
+                        <group string="Décision remplacement">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="cost"/>
+                            <field name="maintenance_cost_total"/>
+                            <field name="annual_maintenance_cost"/>
+                            <field name="maintenance_cost_ratio" widget="progressbar"/>
+                            <field name="replacement_recommended"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-warning" role="alert"
+                         attrs="{'invisible': [('replacement_recommended', '=', False)]}">
+                        <i class="fa fa-exclamation-triangle"/>
+                        Le coût cumulé de maintenance dépasse le seuil : remplacement à étudier.
+                        Utiliser « Imprimer le dossier » ou « Envoyer le rapport » pour l'aide à la décision.
+                    </div>
+                    <notebook>
+                        <page string="Chronologie des interventions">
+                            <field name="maintenance_ids" nolabel="1" readonly="1">
+                                <tree decoration-success="state=='done'" decoration-info="state=='in_progress'"
+                                      decoration-warning="maintenance_type=='corrective'" create="false" edit="false">
+                                    <field name="request_date"/>
+                                    <field name="name"/>
+                                    <field name="maintenance_type"/>
+                                    <field name="failure_code_id"/>
+                                    <field name="failure_severity" optional="show"/>
+                                    <field name="state"/>
+                                    <field name="downtime" sum="Temps d'arrêt (h)"/>
+                                    <field name="total_cost" sum="Coût total"/>
+                                    <field name="work_performed" optional="hide"/>
+                                    <field name="description" optional="hide"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action pour la vue des équipements -->
+    <record id="action_maintenance_equipment" model="ir.actions.act_window">
+        <field name="name">Équipements</field>
+        <field name="res_model">gmao.equipment</field>
+        <field name="view_mode">kanban,tree,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_maintenance_equipment_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créer le premier équipement
+            </p>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- P1bis : Analyse remplacement (decision repair vs replace)     -->
+    <!-- ============================================================ -->
+    <record id="view_equipment_replacement_tree" model="ir.ui.view">
+        <field name="name">gmao.equipment.replacement.tree</field>
+        <field name="model">gmao.equipment</field>
+        <field name="arch" type="xml">
+            <tree string="Analyse remplacement" default_order="maintenance_cost_ratio desc"
+                  decoration-danger="replacement_recommended" create="false">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="category_id"/>
+                <field name="site_id"/>
+                <field name="cost" sum="Valeur"/>
+                <field name="maintenance_cost_total" sum="Coût cumulé"/>
+                <field name="annual_maintenance_cost" sum="Coût 12 mois"/>
+                <field name="maintenance_cost_ratio" string="Ratio coût/valeur %"/>
+                <field name="maintenance_count"/>
+                <field name="replacement_recommended" string="À remplacer"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_equipment_replacement_graph" model="ir.ui.view">
+        <field name="name">gmao.equipment.replacement.graph</field>
+        <field name="model">gmao.equipment</field>
+        <field name="arch" type="xml">
+            <graph string="Coût de maintenance par équipement" type="bar">
+                <field name="name"/>
+                <field name="maintenance_cost_total" type="measure"/>
+                <field name="cost" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_equipment_replacement_pivot" model="ir.ui.view">
+        <field name="name">gmao.equipment.replacement.pivot</field>
+        <field name="model">gmao.equipment</field>
+        <field name="arch" type="xml">
+            <pivot string="Analyse remplacement">
+                <field name="category_id" type="row"/>
+                <field name="maintenance_cost_total" type="measure"/>
+                <field name="annual_maintenance_cost" type="measure"/>
+                <field name="maintenance_cost_ratio" type="measure"/>
+                <field name="cost" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_equipment_replacement" model="ir.actions.act_window">
+        <field name="name">Analyse remplacement</field>
+        <field name="res_model">gmao.equipment</field>
+        <field name="view_mode">tree,form,graph,pivot</field>
+        <!-- Clic sur une ligne -> form-RAPPORT metier (lecture seule + chrono),
+             pas le form d'edition standard. -->
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'tree', 'view_id': ref('view_equipment_replacement_tree')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'form', 'view_id': ref('view_equipment_report_form')}),
+            (0, 0, {'sequence': 3, 'view_mode': 'graph', 'view_id': ref('view_equipment_replacement_graph')}),
+            (0, 0, {'sequence': 4, 'view_mode': 'pivot', 'view_id': ref('view_equipment_replacement_pivot')})]"/>
+        <field name="search_view_id" ref="view_maintenance_equipment_search"/>
+        <field name="domain">[('state', '!=', 'scrapped')]</field>
+        <field name="context">{'search_default_operational': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun équipement à analyser
+            </p>
+            <p>Trie les équipements par ratio coût de maintenance / valeur d'achat
+               pour décider des remplacements.</p>
+        </field>
+    </record>
+
+    <!-- Action pour le rapport des équipements -->
+    <record id="action_maintenance_equipment_report" model="ir.actions.act_window">
+        <field name="name">Rapport Équipements</field>
+        <field name="res_model">gmao.equipment</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+        <!-- Clic ligne -> form-RAPPORT metier (KPI + chronologie), pas le form edit -->
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'tree', 'view_id': ref('view_maintenance_equipment_tree')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'form', 'view_id': ref('view_equipment_report_form')}),
+            (0, 0, {'sequence': 3, 'view_mode': 'pivot', 'view_id': ref('view_maintenance_equipment_pivot')}),
+            (0, 0, {'sequence': 4, 'view_mode': 'graph', 'view_id': ref('view_maintenance_equipment_graph')})]"/>
+        <field name="search_view_id" ref="view_maintenance_equipment_search"/>
+        <field name="context">{'search_default_operational': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucun équipement trouvé
+            </p>
+        </field>
+    </record>
+</odoo>

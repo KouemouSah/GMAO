@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- ================================================================ -->
+        <!-- P5.4 : Rapport PDF Conformité & Sécurité (multi-doc).            -->
+        <!-- ================================================================ -->
+        <record id="action_report_conformite" model="ir.actions.report">
+            <field name="name">Rapport conformité</field>
+            <field name="model">maintenance.conformite.securite</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">gmao_suite.report_conformite_document</field>
+            <field name="report_file">gmao_suite.report_conformite</field>
+            <field name="print_report_name">'Conformite %s' % (object.name or '')</field>
+            <field name="binding_model_id" ref="model_maintenance_conformite_securite"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="report_conformite_document">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <div class="row mb-3">
+                                <div class="col-8">
+                                    <h2 style="margin:0;">Inspection de conformité &amp; sécurité</h2>
+                                    <p class="text-muted mb-0"><span t-field="o.name"/></p>
+                                    <p class="mb-0"><strong>Société : </strong><span t-field="o.company_id"/></p>
+                                </div>
+                                <div class="col-4 text-right">
+                                    <span t-if="o.result == 'conforme'" class="badge badge-pill badge-success p-2">Conforme</span>
+                                    <span t-if="o.result == 'non_conforme'" class="badge badge-pill badge-danger p-2">Non conforme</span>
+                                    <span t-if="o.result == 'action_requise'" class="badge badge-pill badge-warning p-2">Action requise</span>
+                                </div>
+                            </div>
+
+                            <table class="table table-sm table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <td style="width:25%;"><strong>Catégorie</strong></td>
+                                        <td style="width:25%;"><span t-field="o.category"/></td>
+                                        <td style="width:25%;"><strong>Date d'inspection</strong></td>
+                                        <td style="width:25%;"><span t-field="o.inspection_date"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Équipement</strong></td>
+                                        <td><span t-field="o.equipment_id"/></td>
+                                        <td><strong>Objet d'inspection</strong></td>
+                                        <td><span t-field="o.inspection_object"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Inspecteur</strong></td>
+                                        <td><span t-field="o.inspector_id"/></td>
+                                        <td><strong>Prochaine inspection</strong></td>
+                                        <td><span t-field="o.next_inspection_date"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Statut</strong></td>
+                                        <td><span t-field="o.state"/></td>
+                                        <td><strong>Résultat</strong></td>
+                                        <td><span t-field="o.result"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h4 class="mt-4">Observations</h4>
+                            <p t-if="o.observations"><span t-field="o.observations"/></p>
+                            <p t-if="not o.observations" class="text-muted">Aucune observation.</p>
+
+                            <div t-if="o.result == 'non_conforme'" class="alert alert-danger mt-3" role="alert">
+                                <strong>Non conformité constatée.</strong> Une action corrective est requise.
+                            </div>
+                            <div t-if="o.result == 'action_requise'" class="alert alert-warning mt-3" role="alert">
+                                <strong>Action requise.</strong> Un suivi est à planifier avant la prochaine inspection.
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

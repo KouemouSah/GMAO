@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <!-- Vue graph Odoo 13 : type bar, fields simples + mesures.
+             Note : type="row"/type="col" sont des attributs PIVOT, pas graph. -->
+        <record id="view_maintenance_request_graph_qweb" model="ir.ui.view">
+            <field name="name">gmao.request.graph.analytics</field>
+            <field name="model">gmao.request</field>
+            <field name="arch" type="xml">
+                <graph string="Analyse des demandes de maintenance" type="bar" stacked="False">
+                    <field name="state"/>
+                    <field name="maintenance_type"/>
+                    <field name="duration" type="measure"/>
+                    <field name="total_cost" type="measure"/>
+                    <field name="downtime" type="measure"/>
+                    <field name="mttr" type="measure"/>
+                    <field name="mtbf" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- Vue pivot complementaire (vraies dimensions row/col) -->
+        <record id="view_maintenance_request_pivot_analytics" model="ir.ui.view">
+            <field name="name">gmao.request.pivot.analytics</field>
+            <field name="model">gmao.request</field>
+            <field name="arch" type="xml">
+                <pivot string="Analyse pivot des demandes de maintenance">
+                    <field name="equipment_id" type="row"/>
+                    <field name="state" type="col"/>
+                    <field name="maintenance_type" type="col"/>
+                    <field name="duration" type="measure"/>
+                    <field name="total_cost" type="measure"/>
+                    <field name="mttr" type="measure"/>
+                    <field name="mtbf" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!-- Action : ouvre la vue graph par defaut, switch possible vers pivot/tree/form -->
+        <record id="action_maintenance_request_graph" model="ir.actions.act_window">
+            <field name="name">Analyse graphique des demandes</field>
+            <field name="res_model">gmao.request</field>
+            <field name="view_mode">graph,pivot,tree,form</field>
+            <field name="context">{}</field>
+        </record>
+
+    </data>
+</odoo>

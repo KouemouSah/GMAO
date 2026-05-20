@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="gmao_suite.DashboardMain">
+        <div class="o_gmao_dashboard">
+
+            <!-- ============ HEADER + FILTRES ============ -->
+            <div class="o_gmao_header">
+                <div class="o_gmao_title">
+                    <i class="fa fa-dashboard"/>
+                    <span>Tableau de bord GMAO</span>
+                </div>
+                <div class="o_gmao_filters">
+                    <select class="o_gmao_filter_company form-control" t-if="companies and companies.length > 1">
+                        <option value="">Toutes les sociétés</option>
+                        <t t-foreach="companies" t-as="c">
+                            <option t-att-value="c.id" t-att-selected="c.id === companyId ? 'selected' : undefined">
+                                <t t-esc="c.name"/>
+                            </option>
+                        </t>
+                    </select>
+                    <select class="o_gmao_filter_site form-control">
+                        <option value="">Tous les sites</option>
+                        <t t-foreach="sites" t-as="s">
+                            <option t-att-value="s.id" t-att-selected="s.id === siteId ? 'selected' : undefined">
+                                <t t-esc="s.name"/>
+                            </option>
+                        </t>
+                    </select>
+                    <select class="o_gmao_filter_period form-control">
+                        <option value="all" t-att-selected="period === 'all' ? 'selected' : undefined">Tout l'historique</option>
+                        <option value="month" t-att-selected="period === 'month' ? 'selected' : undefined">Mois en cours</option>
+                        <option value="quarter" t-att-selected="period === 'quarter' ? 'selected' : undefined">3 derniers mois</option>
+                        <option value="year" t-att-selected="period === 'year' ? 'selected' : undefined">Annee en cours</option>
+                        <option value="custom" t-att-selected="period === 'custom' ? 'selected' : undefined">Personnalise</option>
+                    </select>
+                    <span t-attf-class="o_gmao_custom_dates #{period === 'custom' ? '' : 'o_hidden'}">
+                        <input type="date" class="o_gmao_filter_date_from form-control" t-att-value="dateFrom or ''"/>
+                        <span class="o_gmao_dash">&#8594;</span>
+                        <input type="date" class="o_gmao_filter_date_to form-control" t-att-value="dateTo or ''"/>
+                    </span>
+                    <button class="o_gmao_refresh btn btn-primary">
+                        <i class="fa fa-refresh"/> Rafraichir
+                    </button>
+                </div>
+            </div>
+
+            <!-- ============ KPI CARDS PRINCIPALES ============ -->
+            <div class="o_gmao_kpi_grid">
+                <div class="o_gmao_kpi o_gmao_kpi_clickable" data-action="overdue" style="--accent:#dc3545;">
+                    <div class="o_gmao_kpi_icon"><i class="fa fa-exclamation-triangle"/></div>
+                    <div class="o_gmao_kpi_body">
+                        <div class="o_gmao_kpi_value"><t t-esc="kpis.overdue"/></div>
+                        <div class="o_gmao_kpi_label">En retard</div>
+                    </div>
+                </div>
+                <div class="o_gmao_kpi o_gmao_kpi_clickable" data-action="open" style="--accent:#ffc107;">
+                    <div class="o_gmao_kpi_icon"><i class="fa fa-folder-open"/></div>
+                    <div class="o_gmao_kpi_body">
+                        <div class="o_gmao_kpi_value"><t t-esc="kpis.open"/></div>
+                        <div class="o_gmao_kpi_label">Ouvertes</div>
+                    </div>
+                </div>
+                <div class="o_gmao_kpi o_gmao_kpi_clickable" data-action="done" style="--accent:#28a745;">
+                    <div class="o_gmao_kpi_icon"><i class="fa fa-check-circle"/></div>
+                    <div class="o_gmao_kpi_body">
+                        <div class="o_gmao_kpi_value"><t t-esc="kpis.done"/></div>
+                        <div class="o_gmao_kpi_label">Terminees</div>
+                    </div>
+                </div>
+                <div class="o_gmao_kpi" style="--accent:#875A7B;">
+                    <div class="o_gmao_kpi_icon"><i class="fa fa-list"/></div>
+                    <div class="o_gmao_kpi_body">
+                        <div class="o_gmao_kpi_value"><t t-esc="kpis.total"/></div>
+                        <div class="o_gmao_kpi_label">Total demandes</div>
+                    </div>
+                </div>
+                <div class="o_gmao_kpi o_gmao_kpi_clickable" data-action="preventive" style="--accent:#20c997;">
+                    <div class="o_gmao_kpi_icon"><i class="fa fa-shield"/></div>
+                    <div class="o_gmao_kpi_body">
+                        <div class="o_gmao_kpi_value"><t t-esc="kpis.pct_preventive"/>%</div>
+                        <div class="o_gmao_kpi_label">Proactivite</div>
+                    </div>
+                </div>
+                <div class="o_gmao_kpi" style="--accent:#17a2b8;">
+                    <div class="o_gmao_kpi_icon"><i class="fa fa-tachometer"/></div>
+                    <div class="o_gmao_kpi_body">
+                        <div class="o_gmao_kpi_value"><t t-esc="kpis.availability"/>%</div>
+                        <div class="o_gmao_kpi_label">Disponibilite</div>
+                    </div>
+                </div>
+                <div class="o_gmao_kpi" style="--accent:#6f42c1;">
+                    <div class="o_gmao_kpi_icon"><i class="fa fa-clock-o"/></div>
+                    <div class="o_gmao_kpi_body">
+                        <div class="o_gmao_kpi_value"><t t-esc="kpis.avg_mttr"/> h</div>
+                        <div class="o_gmao_kpi_label">MTTR moyen</div>
+                    </div>
+                </div>
+                <div class="o_gmao_kpi" style="--accent:#fd7e14;">
+                    <div class="o_gmao_kpi_icon"><i class="fa fa-money"/></div>
+                    <div class="o_gmao_kpi_body">
+                        <div class="o_gmao_kpi_value"><t t-esc="fmt(kpis.total_cost)"/></div>
+                        <div class="o_gmao_kpi_label">Cout total</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ GRAPHIQUES ============ -->
+            <div class="o_gmao_charts_grid">
+                <div class="o_gmao_chart_card o_gmao_chart_wide">
+                    <div class="o_gmao_chart_card_title"><i class="fa fa-line-chart"/> Volume mensuel</div>
+                    <div class="o_gmao_canvas_wrap"><canvas id="gmao_chart_month"/></div>
+                </div>
+                <div class="o_gmao_chart_card">
+                    <div class="o_gmao_chart_card_title"><i class="fa fa-pie-chart"/> Demandes par etat</div>
+                    <div class="o_gmao_canvas_wrap"><canvas id="gmao_chart_state"/></div>
+                </div>
+                <div class="o_gmao_chart_card">
+                    <div class="o_gmao_chart_card_title"><i class="fa fa-balance-scale"/> Preventif vs correctif</div>
+                    <div class="o_gmao_canvas_wrap"><canvas id="gmao_chart_type"/></div>
+                </div>
+                <div class="o_gmao_chart_card">
+                    <div class="o_gmao_chart_card_title"><i class="fa fa-wrench"/> Top equipements (cout)</div>
+                    <div class="o_gmao_canvas_wrap"><canvas id="gmao_chart_equipment"/></div>
+                </div>
+                <div class="o_gmao_chart_card">
+                    <div class="o_gmao_chart_card_title"><i class="fa fa-building"/> Cout par site</div>
+                    <div class="o_gmao_canvas_wrap"><canvas id="gmao_chart_site"/></div>
+                </div>
+                <div class="o_gmao_chart_card">
+                    <div class="o_gmao_chart_card_title"><i class="fa fa-exclamation-circle"/> Top pannes recurrentes</div>
+                    <div class="o_gmao_canvas_wrap"><canvas id="gmao_chart_failure"/></div>
+                </div>
+                <div class="o_gmao_chart_card">
+                    <div class="o_gmao_chart_card_title"><i class="fa fa-sitemap"/> Pannes par mode</div>
+                    <div class="o_gmao_canvas_wrap"><canvas id="gmao_chart_failure_mode"/></div>
+                </div>
+                <div class="o_gmao_chart_card">
+                    <div class="o_gmao_chart_card_title"><i class="fa fa-thermometer-half"/> Severite des pannes</div>
+                    <div class="o_gmao_canvas_wrap"><canvas id="gmao_chart_severity"/></div>
+                </div>
+            </div>
+
+            <!-- ============ BAS : ressources + activite ============ -->
+            <div class="o_gmao_bottom_grid">
+                <div class="o_gmao_panel">
+                    <div class="o_gmao_panel_title"><i class="fa fa-cubes"/> Ressources</div>
+                    <div class="o_gmao_resource_row">
+                        <span>Sites</span><strong><t t-esc="kpis.sites_count"/></strong>
+                    </div>
+                    <div class="o_gmao_resource_row">
+                        <span>Equipements</span><strong><t t-esc="kpis.equipment_count"/></strong>
+                    </div>
+                    <div class="o_gmao_resource_row o_gmao_kpi_clickable" data-action="repair">
+                        <span>En reparation</span>
+                        <strong t-attf-class="#{kpis.equipment_in_repair > 0 ? 'text-warning' : ''}">
+                            <t t-esc="kpis.equipment_in_repair"/>
+                        </strong>
+                    </div>
+                    <div class="o_gmao_resource_row">
+                        <span>Equipes</span><strong><t t-esc="kpis.teams_count"/></strong>
+                    </div>
+                    <div class="o_gmao_resource_row">
+                        <span>Contrats actifs</span><strong><t t-esc="kpis.contracts_active"/></strong>
+                    </div>
+                    <div class="o_gmao_resource_row o_gmao_kpi_clickable" data-action="recurring">
+                        <span>Pannes recurrentes</span>
+                        <strong t-attf-class="#{kpis.recurring_failures > 0 ? 'text-danger' : ''}">
+                            <t t-esc="kpis.recurring_failures"/>
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="o_gmao_panel o_gmao_panel_wide">
+                    <div class="o_gmao_panel_title"><i class="fa fa-history"/> Activite recente</div>
+                    <table class="o_gmao_recent_table">
+                        <thead>
+                            <tr>
+                                <th class="o_gmao_sort" data-sort="date">Date <i class="fa fa-sort"/></th>
+                                <th class="o_gmao_sort" data-sort="name">Reference <i class="fa fa-sort"/></th>
+                                <th class="o_gmao_sort" data-sort="equipment">Equipement <i class="fa fa-sort"/></th>
+                                <th class="o_gmao_sort" data-sort="state_raw">Etat <i class="fa fa-sort"/></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-if="!recent.length">
+                                <td colspan="4" class="text-muted text-center">Aucune demande sur la periode.</td>
+                            </tr>
+                            <tr t-foreach="recent" t-as="r" class="o_gmao_recent_row" t-att-data-id="r.id">
+                                <td><t t-esc="r.date"/></td>
+                                <td><strong><t t-esc="r.name"/></strong></td>
+                                <td><t t-esc="r.equipment"/></td>
+                                <td>
+                                    <span t-attf-class="o_gmao_badge o_gmao_state_#{r.state_raw}">
+                                        <t t-esc="r.state"/>
+                                    </span>
+                                    <span t-if="r.is_overdue" class="o_gmao_badge o_gmao_state_overdue">retard</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="action_report_maintenance_parts_used" model="ir.actions.report">
+            <field name="name">Fiche piece utilisee</field>
+            <field name="model">maintenance.parts.used</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">gmao_suite.report_maintenance_parts_used</field>
+            <field name="report_file">gmao_suite.report_maintenance_parts_used</field>
+            <field name="print_report_name">'Piece - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="model_maintenance_parts_used"/>
+            <field name="binding_type">report</field>
+            <field name="groups_id" eval="[(4, ref('gmao_suite.group_parts_used_user')), (4, ref('gmao_suite.group_parts_used_admin'))]"/>
+        </record>
+
+        <record id="action_report_maintenance_parts_used_landscape" model="ir.actions.report">
+            <field name="name">Rapport General de Pieces utilisees (Paysage)</field>
+            <field name="model">maintenance.parts.used</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">gmao_suite.report_maintenance_parts_used_landscape</field>
+            <field name="report_file">gmao_suite.report_maintenance_parts_used_landscape</field>
+            <field name="print_report_name">'Rapport pieces (Paysage) - %s' % (object.name)</field>
+            <field name="binding_model_id" ref="model_maintenance_parts_used"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="gmao_suite.paperformat_euro_landscape"/>
+            <field name="groups_id" eval="[(4, ref('gmao_suite.group_parts_used_user')), (4, ref('gmao_suite.group_parts_used_admin'))]"/>
+        </record>
+
+        <!-- R2 : template QWeb du rapport piece utilisee (etait absent !) -->
+        <template id="report_maintenance_parts_used">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2>Fiche piece utilisee <small class="text-muted">N° <span t-field="o.name"/></small></h2>
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <table class="table table-sm table-borderless">
+                                        <tr><td><strong>Produit</strong></td><td><span t-field="o.product_id"/></td></tr>
+                                        <tr><td><strong>Quantite</strong></td><td><span t-field="o.quantity"/></td></tr>
+                                        <tr><td><strong>Date retrait</strong></td><td><span t-field="o.withdrawal_date"/></td></tr>
+                                    </table>
+                                </div>
+                                <div class="col-6">
+                                    <table class="table table-sm table-borderless">
+                                        <tr><td><strong>Intervention</strong></td><td><span t-field="o.intervention_id"/></td></tr>
+                                        <tr><td><strong>Technicien</strong></td><td><span t-field="o.technician_id"/></td></tr>
+                                        <tr><td><strong>Etat</strong></td><td><span t-field="o.state"/></td></tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <!-- Variante paysage liste agregee -->
+        <template id="report_maintenance_parts_used_landscape">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Rapport general des pieces utilisees</h2>
+                        <table class="table table-sm table-striped mt-3">
+                            <thead style="background-color:#875A7B; color:white;">
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>Produit</th>
+                                    <th class="text-right">Quantite</th>
+                                    <th>Intervention</th>
+                                    <th>Technicien</th>
+                                    <th>Date retrait</th>
+                                    <th>Etat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="docs" t-as="o">
+                                    <td><span t-field="o.name"/></td>
+                                    <td><span t-field="o.product_id"/></td>
+                                    <td class="text-right"><span t-field="o.quantity"/></td>
+                                    <td><span t-field="o.intervention_id"/></td>
+                                    <td><span t-field="o.technician_id"/></td>
+                                    <td><span t-field="o.withdrawal_date"/></td>
+                                    <td><span t-field="o.state"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

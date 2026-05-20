@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Menu racine GMAO Suite -->
+        <menuitem id="menu_gmao_root"
+                  name="GMAO Suite"
+                  sequence="10"
+                  web_icon="gmao_suite,static/description/icon.png"/>
+
+        <!-- V6 : Dashboard PRO (client action JS) en premier sous-menu -->
+        <menuitem id="menu_gmao_dashboard"
+                  name="Tableau de bord"
+                  parent="menu_gmao_root"
+                  action="action_gmao_dashboard_client"
+                  sequence="1"/>
+
+        <!-- ============================================ -->
+        <!-- Operations : demandes d'intervention         -->
+        <!-- ============================================ -->
+        <menuitem id="menu_gmao_operations"
+                  name="Operations"
+                  parent="menu_gmao_root"
+                  sequence="10"/>
+
+        <menuitem id="menu_maintenance_request"
+                  name="Demandes d'intervention"
+                  parent="menu_gmao_operations"
+                  action="action_maintenance_request"
+                  sequence="11"/>
+
+        <menuitem id="menu_maintenance_planning"
+                  name="Planning"
+                  parent="menu_gmao_operations"
+                  action="action_maintenance_planning"
+                  sequence="12"/>
+
+        <menuitem id="menu_maintenance_request_graph"
+                  name="Analyse graphique"
+                  parent="menu_gmao_operations"
+                  action="action_maintenance_request_graph"
+                  sequence="13"/>
+
+        <!-- ============================================ -->
+        <!-- Ressources : sites, equipements, equipes     -->
+        <!-- ============================================ -->
+        <menuitem id="menu_gmao_resources"
+                  name="Ressources"
+                  parent="menu_gmao_root"
+                  sequence="20"/>
+
+        <menuitem id="menu_maintenance_site"
+                  name="Sites"
+                  parent="menu_gmao_resources"
+                  action="action_maintenance_site"
+                  sequence="21"/>
+
+        <menuitem id="menu_maintenance_equipment"
+                  name="Equipements"
+                  parent="menu_gmao_resources"
+                  action="action_maintenance_equipment"
+                  sequence="22"/>
+
+        <menuitem id="menu_maintenance_equipment_category"
+                  name="Categories d'equipement"
+                  parent="menu_gmao_resources"
+                  action="action_maintenance_equipment_category"
+                  sequence="23"/>
+
+        <menuitem id="menu_maintenance_team"
+                  name="Equipes de maintenance"
+                  parent="menu_gmao_resources"
+                  action="action_maintenance_team"
+                  sequence="24"/>
+
+        <menuitem id="menu_gmao_failure_code"
+                  name="Codes panne / intervention"
+                  parent="menu_gmao_resources"
+                  action="action_gmao_failure_code"
+                  sequence="27"/>
+
+        <menuitem id="menu_gmao_report_phrase"
+                  name="Phrases-types rapport"
+                  parent="menu_gmao_resources"
+                  action="action_gmao_report_phrase"
+                  sequence="28"/>
+
+        <menuitem id="menu_maintenance_parts_used"
+                  name="Pieces utilisees"
+                  parent="menu_gmao_resources"
+                  action="action_maintenance_parts_used"
+                  sequence="25"/>
+
+        <menuitem id="menu_maintenance_parts_allocation"
+                  name="Allocation des pieces"
+                  parent="menu_gmao_resources"
+                  action="action_maintenance_parts_allocation"
+                  sequence="26"/>
+
+        <!-- ============================================ -->
+        <!-- Gestion : contrats, conformite, efficacite   -->
+        <!-- ============================================ -->
+        <menuitem id="menu_gmao_management"
+                  name="Gestion"
+                  parent="menu_gmao_root"
+                  sequence="30"/>
+
+        <menuitem id="menu_maintenance_contract"
+                  name="Contrats de maintenance"
+                  parent="menu_gmao_management"
+                  action="action_maintenance_contract"
+                  sequence="31"/>
+
+        <menuitem id="menu_conformite_securite"
+                  name="Conformite et securite"
+                  parent="menu_gmao_management"
+                  action="action_conformite_securite"
+                  sequence="32"/>
+
+        <menuitem id="menu_efficacite_energetique"
+                  name="Efficacite energetique"
+                  parent="menu_gmao_management"
+                  action="action_efficacite_energetique"
+                  sequence="33"/>
+
+        <!-- Kits de pieces standard (auto-calage preventif) -->
+        <menuitem id="menu_gmao_parts_kit"
+                  name="Kits de pieces standard"
+                  parent="menu_gmao_management"
+                  action="action_gmao_parts_kit"
+                  sequence="34"/>
+
+        <!-- ============================================ -->
+        <!-- Rapports et wizards                          -->
+        <!-- ============================================ -->
+        <menuitem id="menu_gmao_reports"
+                  name="Rapports"
+                  parent="menu_gmao_root"
+                  sequence="40"/>
+
+        <menuitem id="menu_maintenance_equipment_report"
+                  name="Rapport equipements"
+                  parent="menu_gmao_reports"
+                  action="action_maintenance_equipment_report"
+                  sequence="41"/>
+
+        <menuitem id="menu_equipment_replacement"
+                  name="Analyse remplacement"
+                  parent="menu_gmao_reports"
+                  action="action_equipment_replacement"
+                  sequence="41"/>
+
+        <menuitem id="menu_request_cost_timeline"
+                  name="Cout maintenance dans le temps"
+                  parent="menu_gmao_reports"
+                  action="action_request_cost_timeline"
+                  sequence="42"/>
+
+        <menuitem id="menu_maintenance_site_report"
+                  name="Rapport sites"
+                  parent="menu_gmao_reports"
+                  action="action_maintenance_site_report"
+                  sequence="42"/>
+
+        <!-- P5.2 : ecran analytique par site (complement du PDF rapport site) -->
+        <menuitem id="menu_site_analysis"
+                  name="Analyse par site"
+                  parent="menu_gmao_reports"
+                  action="action_site_analysis"
+                  sequence="42"/>
+
+        <!-- P6.4 : analyse de recurrence des pannes -->
+        <menuitem id="menu_failure_analysis"
+                  name="Analyse des pannes"
+                  parent="menu_gmao_reports"
+                  action="action_failure_analysis"
+                  sequence="43"/>
+
+        <menuitem id="menu_conformite_securite_report"
+                  name="Rapport conformite"
+                  parent="menu_gmao_reports"
+                  action="action_conformite_securite_report"
+                  sequence="43"/>
+
+        <menuitem id="menu_maintenance_report_wizard"
+                  name="Generateur de rapport personnalise"
+                  parent="menu_gmao_reports"
+                  action="action_maintenance_report_wizard"
+                  sequence="44"/>
+
+        <!-- P5.3 : le menu ouvre l'ecran d'analyse (pivot/graph), plus le
+             wizard d'emblee. Impression periode via le menu Action. -->
+        <menuitem id="menu_maintenance_parts_used_report_wizard"
+                  name="Analyse pieces utilisees"
+                  parent="menu_gmao_reports"
+                  action="action_parts_used_analysis"
+                  sequence="45"/>
+
+        <!-- P4 : Rapport financier consolide -->
+        <menuitem id="menu_gmao_financial_report"
+                  name="Rapport financier"
+                  parent="menu_gmao_reports"
+                  action="action_gmao_financial_report"
+                  sequence="46"/>
+
+    </data>
+</odoo>

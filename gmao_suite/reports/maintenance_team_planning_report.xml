@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Refonte planning d'equipe : analyse charge + alertes conflits + cards visuelles -->
+        <record id="action_report_maintenance_team_planning" model="ir.actions.report">
+            <field name="name">Planning d'equipe (30 jours)</field>
+            <field name="model">gmao.team</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">gmao_suite.report_maintenance_team_planning</field>
+            <field name="report_file">gmao_suite.report_maintenance_team_planning</field>
+            <field name="print_report_name">'Planning equipe %s' % (object.name or '')</field>
+            <field name="binding_model_id" ref="model_gmao_team"/>
+            <field name="binding_type">report</field>
+            <field name="paperformat_id" ref="base.paperformat_euro"/>
+        </record>
+
+        <template id="report_maintenance_team_planning">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <t t-foreach="docs" t-as="team">
+                        <t t-set="now" t-value="context_timestamp(datetime.datetime.now())"/>
+                        <t t-set="period_end" t-value="now + relativedelta(days=30)"/>
+                        <t t-set="planned_requests"
+                           t-value="team.request_ids.filtered(lambda r: r.schedule_date and r.schedule_date.date() &gt;= now.date() and r.schedule_date.date() &lt;= period_end.date()).sorted(key=lambda r: r.schedule_date)"/>
+                        <t t-set="total_duration" t-value="sum(planned_requests.mapped('duration'))"/>
+                        <t t-set="total_cost" t-value="sum(planned_requests.mapped('total_cost'))"/>
+                        <t t-set="preventive_count" t-value="len(planned_requests.filtered(lambda r: r.maintenance_type == 'preventive'))"/>
+                        <t t-set="corrective_count" t-value="len(planned_requests.filtered(lambda r: r.maintenance_type == 'corrective'))"/>
+                        <t t-set="overdue_count" t-value="len(team.request_ids.filtered(lambda r: r.is_overdue))"/>
+                        <t t-set="theoretical_capacity" t-value="(team.total_members or 1) * 8 * 22"/><!-- 8h/jr x 22jr ouvres ~mois -->
+                        <t t-set="load_pct" t-value="(total_duration / theoretical_capacity * 100) if theoretical_capacity else 0"/>
+
+                        <div class="page">
+                            <!-- En-tete -->
+                            <div class="row mb-4">
+                                <div class="col-9">
+                                    <h2 style="margin:0;">Planning d'equipe
+                                        <small class="text-muted"><span t-esc="team.name"/></small>
+                                    </h2>
+                                    <p class="text-muted mb-0">
+                                        Du <span t-esc="now.strftime('%d/%m/%Y')"/>
+                                        au <span t-esc="period_end.strftime('%d/%m/%Y')"/>
+                                        (30 jours glissants)
+                                    </p>
+                                </div>
+                                <div class="col-3 text-right">
+                                    <t t-if="overdue_count">
+                                        <span class="badge badge-danger p-2">
+                                            <i class="fa fa-exclamation-triangle"/>
+                                            <span t-esc="overdue_count"/> en retard
+                                        </span>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <!-- Composition equipe -->
+                            <h4 style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                <i class="fa fa-users"/> Composition
+                            </h4>
+                            <div class="row">
+                                <div class="col-4">
+                                    <table class="table table-sm table-borderless">
+                                        <tr><td><strong>Chef d'equipe</strong></td><td><span t-field="team.leader_id"/></td></tr>
+                                        <tr><td><strong>Membres</strong></td><td><span t-field="team.total_members"/></td></tr>
+                                    </table>
+                                </div>
+                                <div class="col-4">
+                                    <table class="table table-sm table-borderless">
+                                        <tr><td><strong>Taux d'occupation</strong></td>
+                                            <td><span t-esc="'%.1f' % team.occupation_rate"/>%</td></tr>
+                                        <tr><td><strong>Charge planifiee</strong></td>
+                                            <td>
+                                                <span t-attf-class="badge badge-#{load_pct &gt; 80 and 'danger' or (load_pct &gt; 50 and 'warning' or 'success')}">
+                                                    <span t-esc="'%.1f' % load_pct"/>%
+                                                </span>
+                                            </td></tr>
+                                    </table>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted">
+                                        <strong>Formule charge :</strong><br/>
+                                        Heures planifiees / (membres x 8h x 22jr) x 100<br/>
+                                        Capacite theorique : <span t-esc="theoretical_capacity"/> h
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- KPIs cards -->
+                            <h4 class="mt-4" style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                <i class="fa fa-line-chart"/> Synthese de la periode
+                            </h4>
+                            <div class="row">
+                                <div class="col-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body p-2">
+                                            <small class="text-muted">Interventions planifiees</small>
+                                            <h3 style="margin:0; color:#875A7B;"><span t-esc="len(planned_requests)"/></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body p-2">
+                                            <small class="text-muted">Heures total</small>
+                                            <h3 style="margin:0;"><span t-esc="'%.1f' % total_duration"/> h</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="card text-center bg-light">
+                                        <div class="card-body p-2">
+                                            <small class="text-muted">% Preventif</small>
+                                            <h3 style="margin:0; color:#28a745;">
+                                                <span t-esc="'%.0f' % (preventive_count/(len(planned_requests) or 1) * 100)"/>%
+                                            </h3>
+                                            <small><span t-esc="preventive_count"/> sur <span t-esc="len(planned_requests)"/></small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="card text-center" style="background-color:#28a745; color:white;">
+                                        <div class="card-body p-2">
+                                            <small>Cout planifie</small>
+                                            <h3 style="margin:0;">
+                                                <span t-esc="'%.0f' % total_cost"/> EUR
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Detail planning chronologique -->
+                            <h4 class="mt-4" style="border-bottom:2px solid #875A7B; padding-bottom:5px;">
+                                <i class="fa fa-calendar"/> Planning chronologique
+                            </h4>
+                            <table t-if="planned_requests" class="table table-sm table-striped">
+                                <thead style="background-color:#875A7B; color:white;">
+                                    <tr>
+                                        <th>Date planifiee</th>
+                                        <th>Reference</th>
+                                        <th>Equipement</th>
+                                        <th>Technicien</th>
+                                        <th>Type</th>
+                                        <th>Etat</th>
+                                        <th class="text-right">Duree</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="planned_requests" t-as="r">
+                                        <td><span t-field="r.schedule_date"/></td>
+                                        <td><span t-field="r.name"/></td>
+                                        <td><span t-field="r.equipment_id"/></td>
+                                        <td><span t-field="r.technician_id"/></td>
+                                        <td>
+                                            <span t-attf-class="badge badge-#{r.maintenance_type == 'preventive' and 'success' or 'warning'}">
+                                                <span t-field="r.maintenance_type"/>
+                                            </span>
+                                        </td>
+                                        <td><span t-field="r.state"/></td>
+                                        <td class="text-right"><span t-esc="'%.1f' % r.duration"/> h</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr style="font-weight:bold; border-top:2px solid #000;">
+                                        <td colspan="6" class="text-right">TOTAL HEURES PLANIFIEES :</td>
+                                        <td class="text-right"><span t-esc="'%.1f' % total_duration"/> h</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <p t-if="not planned_requests" class="text-muted">
+                                Aucune intervention planifiee dans les 30 prochains jours pour cette equipe.
+                            </p>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--
+            A9 : Activity types custom GMAO Suite
+            Odoo 13 : res_model_id (Many2one vers ir.model), pas res_model (Char).
+            La ref="model_gmao_request" cible le modele gmao.request via son xml_id
+            auto-genere par Odoo (model_<dotted_replaced_by_underscore>).
+        -->
+        <record id="mail_activity_type_inspection_securite" model="mail.activity.type">
+            <field name="name">Inspection securite</field>
+            <field name="summary">Realiser une inspection de conformite securite</field>
+            <field name="icon">fa-shield</field>
+            <field name="delay_count">7</field>
+            <field name="delay_unit">days</field>
+            <field name="delay_from">previous_activity</field>
+            <field name="res_model_id" ref="model_gmao_request"/>
+        </record>
+
+        <record id="mail_activity_type_intervention_terrain" model="mail.activity.type">
+            <field name="name">Intervention terrain</field>
+            <field name="summary">Se rendre sur site et realiser l'intervention</field>
+            <field name="icon">fa-wrench</field>
+            <field name="delay_count">1</field>
+            <field name="delay_unit">days</field>
+            <field name="delay_from">previous_activity</field>
+            <field name="res_model_id" ref="model_gmao_request"/>
+        </record>
+
+        <record id="mail_activity_type_validation_client" model="mail.activity.type">
+            <field name="name">Validation client</field>
+            <field name="summary">Obtenir la signature et validation du client apres intervention</field>
+            <field name="icon">fa-check-circle</field>
+            <field name="delay_count">2</field>
+            <field name="delay_unit">days</field>
+            <field name="delay_from">previous_activity</field>
+            <field name="res_model_id" ref="model_gmao_request"/>
+        </record>
+    </data>
+</odoo>

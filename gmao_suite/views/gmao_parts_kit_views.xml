@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form kit de pieces -->
+        <record id="view_gmao_parts_kit_form" model="ir.ui.view">
+            <field name="name">gmao.parts.kit.form</field>
+            <field name="model">gmao.parts.kit</field>
+            <field name="arch" type="xml">
+                <form string="Kit de pieces standard">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1><field name="name" placeholder="Ex: Revision climatiseur"/></h1>
+                        </div>
+                        <group>
+                            <group string="Cible (equipement prioritaire, sinon categorie)">
+                                <field name="equipment_id" options="{'no_create': True}"/>
+                                <field name="category_id" options="{'no_create': True}"
+                                       attrs="{'required': [('equipment_id', '=', False)]}"/>
+                            </group>
+                            <group>
+                                <field name="company_id" groups="base.group_multi_company"/>
+                                <field name="active"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Pieces du kit">
+                                <field name="line_ids">
+                                    <tree editable="bottom">
+                                        <field name="product_id"/>
+                                        <field name="quantity"/>
+                                        <field name="part_nature"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Notes">
+                                <field name="note"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree -->
+        <record id="view_gmao_parts_kit_tree" model="ir.ui.view">
+            <field name="name">gmao.parts.kit.tree</field>
+            <field name="model">gmao.parts.kit</field>
+            <field name="arch" type="xml">
+                <tree string="Kits de pieces">
+                    <field name="name"/>
+                    <field name="equipment_id"/>
+                    <field name="category_id"/>
+                    <field name="line_count"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_gmao_parts_kit" model="ir.actions.act_window">
+            <field name="name">Kits de pieces standard</field>
+            <field name="res_model">gmao.parts.kit</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">Definir un kit de pieces standard</p>
+                <p>Les kits pre-calent automatiquement les pieces recurrentes
+                   sur les demandes de maintenance preventive.</p>
+            </field>
+        </record>
+
+        <!-- Bouton 'Charger le kit' sur la demande -->
+        <record id="view_maintenance_request_form_kit_button" model="ir.ui.view">
+            <field name="name">maintenance.request.form.kit.button</field>
+            <field name="model">gmao.request</field>
+            <field name="inherit_id" ref="gmao_suite.view_maintenance_request_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='parts_used_ids']" position="before">
+                    <button name="action_load_parts_kit" type="object"
+                            string="Charger le kit de pieces" icon="fa-magic"
+                            class="btn-link"
+                            attrs="{'invisible': [('equipment_id', '=', False)]}"
+                            help="Charge les pieces standard definies dans le kit applicable a l'equipement."/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

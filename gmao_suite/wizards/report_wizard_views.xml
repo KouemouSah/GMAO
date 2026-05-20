@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Vue du Wizard pour la période d'édition du rapport -->
+        <record id="view_maintenance_report_wizard_form" model="ir.ui.view">
+            <field name="name">maintenance.report.wizard.form</field>
+            <field name="model">maintenance.report.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Choisir la période pour le rapport">
+                    <group>
+                        <field name="report_period_from"/>
+                        <field name="report_period_to"/>
+                    </group>
+                    <footer>
+                        <button string="Générer le Rapport" type="object" name="action_generate_report" class="btn-primary"/>
+                        <button string="Annuler" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action pour ouvrir le wizard -->
+        <record id="action_maintenance_report_wizard" model="ir.actions.act_window">
+            <field name="name">Générer le Rapport de Maintenance</field>
+            <field name="res_model">maintenance.report.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- Supprimé : Bouton dans le menu pour appeler le wizard 
+             (car intégré au menu principal "Graphes d'analyse") -->
+        <!-- <menuitem id="menu_maintenance_report_wizard" 
+                  name="Générer le Rapport de Maintenance"
+                  parent="menu_gmao_operations"
+                  action="action_maintenance_report_wizard"
+                  sequence="15"/> -->
+    </data>
+</odoo>

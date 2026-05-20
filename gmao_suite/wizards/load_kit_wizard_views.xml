@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_load_kit_wizard_form" model="ir.ui.view">
+        <field name="name">gmao.load.kit.wizard.form</field>
+        <field name="model">gmao.load.kit.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Charger un kit de pièces">
+                <group>
+                    <field name="request_id" invisible="1"/>
+                    <field name="available_kit_ids" invisible="1"/>
+                    <field name="equipment_id" readonly="1"/>
+                    <field name="kit_id" domain="[('id', 'in', available_kit_ids)]"
+                           options="{'no_create': True}"/>
+                </group>
+                <div class="text-muted" attrs="{'invisible': [('available_kit_ids', '!=', [])]}">
+                    Aucun kit défini pour cet équipement ou sa catégorie.
+                    Créez-en un dans « Gestion &#8594; Kits de pièces standard ».
+                </div>
+                <footer>
+                    <button name="action_load" type="object" string="Charger le kit"
+                            class="btn-primary"
+                            attrs="{'invisible': [('available_kit_ids', '=', [])]}"/>
+                    <button string="Annuler" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

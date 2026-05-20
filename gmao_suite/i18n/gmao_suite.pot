@@ -1,0 +1,61 @@
+# Translation template (.pot) pour le module GMAO Suite
+# Genere automatiquement - mettez a jour via :
+#   odoo-bin -c odoo.conf -d <db> --i18n-export=gmao_suite/i18n/gmao_suite.pot --modules=gmao_suite --stop-after-init
+#
+# Pour creer une traduction (FR/EN/...) :
+#   cp gmao_suite.pot fr.po   # puis traduire chaque msgstr
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gmao_suite 13.0.2.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Emac SAH <kouemou.sah@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: gmao_suite
+#: model:ir.module.category,name:gmao_suite.module_category_maintenance
+msgid "GMAO Suite"
+msgstr ""
+
+#. module: gmao_suite
+#: model:res.groups,name:gmao_suite.group_gmao_admin
+msgid "GMAO / Administrateur global"
+msgstr ""
+
+#. module: gmao_suite
+#: model:ir.model,name:gmao_suite.model_maintenance_site
+msgid "Site de maintenance"
+msgstr ""
+
+#. module: gmao_suite
+#: model:ir.model,name:gmao_suite.model_maintenance_request
+msgid "Demande d'intervention de maintenance"
+msgstr ""
+
+#. module: gmao_suite
+#: model:ir.model,name:gmao_suite.model_maintenance_team
+msgid "Equipe de Maintenance"
+msgstr ""
+
+#. module: gmao_suite
+#: model:ir.model,name:gmao_suite.model_maintenance_contract
+msgid "Contrat de maintenance"
+msgstr ""
+
+#. module: gmao_suite
+#: model:ir.model,name:gmao_suite.model_maintenance_conformite_securite
+msgid "Conformite et Securite"
+msgstr ""
+
+#. module: gmao_suite
+#: model_terms:ir.actions.act_window,help:gmao_suite.action_maintenance_request
+msgid "Aucune demande de maintenance trouvee"
+msgstr ""
+
+# NOTE: ce fichier est un template minimal pour amorcer l'i18n.
+# Pour generer la version complete extraite du code source, utilisez
+# la commande odoo-bin --i18n-export indiquee en tete de fichier.

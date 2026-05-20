@@ -1,0 +1,82 @@
+/* Split-pane redimensionnable de la zone de travail (widget
+   many2many_binary_preview). Au clic sur un document, .o_action_manager
+   passe en flex row : vue/donnees a gauche, apercu du fichier a droite,
+   gutter draggable au milieu. Sous la navbar (pas de superposition). */
+
+.o_action_manager.o_gmao_split_active {
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+/* La vue courante prend l'espace restant a gauche */
+.o_action_manager.o_gmao_split_active > .o_action {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
+    overflow: auto;
+}
+
+/* Barre de separation deplacable */
+.o_gmao_split_gutter {
+    flex: 0 0 6px;
+    cursor: col-resize;
+    background: #dee2e6;
+    transition: background 0.15s;
+}
+.o_gmao_split_gutter:hover {
+    background: #875A7B;
+}
+
+/* Volet droit : apercu du fichier */
+.o_gmao_split_pane {
+    flex: 0 0 40%;
+    min-width: 240px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    height: 100%;
+}
+.o_gmao_split_bar {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.o_gmao_split_name {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.o_gmao_split_close {
+    padding: 0 6px;
+    color: #6c757d;
+}
+.o_gmao_split_frame {
+    flex: 1 1 auto;
+    width: 100%;
+    border: 0;
+}
+
+/* Mode COMPACT de la vue gauche quand le split est actif : Odoo 13 n'a pas
+   de container-queries, on adapte donc manuellement (police + largeur feuille
+   + paddings) pour que les donnees tiennent dans le volet retreci. */
+.o_action_manager.o_gmao_split_active > .o_action {
+    font-size: 0.9em;
+}
+.o_action_manager.o_gmao_split_active > .o_action .o_form_sheet {
+    max-width: 100% !important;
+    padding: 12px !important;
+}
+.o_action_manager.o_gmao_split_active > .o_action .o_form_sheet_bg {
+    padding: 8px !important;
+}
+
+/* Responsive : sur petit ecran, volet plus large par defaut */
+@media (max-width: 768px) {
+    .o_gmao_split_pane { flex-basis: 55%; min-width: 160px; }
+}

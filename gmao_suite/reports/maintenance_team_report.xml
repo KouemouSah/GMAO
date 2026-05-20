@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Action de rapport pour le rapport d'équipe -->
+        <record id="action_report_maintenance_team" model="ir.actions.report">
+            <field name="name">Rapport Équipe de Maintenance</field>
+            <field name="model">gmao.team</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">gmao_suite.report_maintenance_team</field>
+            <field name="report_file">gmao_suite.report_maintenance_team</field>
+            <field name="binding_model_id" ref="model_gmao_team"/>
+            <field name="binding_type">report</field>
+            <field name="print_report_name">'Rapport Équipe - %s' % (object.name)</field>
+            <field name="paperformat_id" ref="base.paperformat_euro"/>
+        </record>
+
+        <!-- Action du wizard -->
+        <record id="action_maintenance_team_report_wizard" model="ir.actions.act_window">
+            <field name="name">Générer Rapport d'Équipe</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">maintenance.team.report.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="model_gmao_team"/>
+        </record>
+    </data>
+
+    <data>
+        <template id="report_maintenance_team">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <!-- En-tête avec les informations de filtrage -->
+                    <div style="text-align: center; border: 2px solid #000; border-radius: 15px; padding: 10px; margin-bottom: 20px;">
+                        <h2 style="margin: 0; font-size: 24px;">RAPPORT ANALYSE DES PERFORMANCES ÉQUIPE</h2>
+                        <div style="text-align: center; margin-top: 5px;">
+                            <hr style="border: 1px solid #000; width: 90%; margin: auto;"/>
+                            <p style="margin: 5px 0; font-size: 14px;">
+                                Utilisateur: <span t-esc="env.user.name"/> |
+                                Date édition: <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M')"/> |
+                                <t t-if="data and data.get('start_date') and data.get('end_date')">
+                                    Période du <span t-esc="data['start_date'] if data['start_date'] else 'N/A'"/> au
+                                    <span t-esc="data['end_date'] if data['end_date'] else 'N/A'"/>
+                                </t>
+                                <t t-else="">
+                                    Période non définie
+                                </t>
+                            </p>
+                        </div>
+                    </div>
+
+                    <t t-if="team_data">
+                        <!-- Boucle sur les données d'équipe -->
+                        <t t-foreach="team_data" t-as="data">
+                            <div class="page">
+                                <!-- Informations générales de l'équipe -->
+                                <div class="row mb32">
+                                    <div class="col-12">
+                                        <table class="table table-sm" style="border-collapse: collapse; width: 100%;">
+                                            <thead style="background-color: #c2eaba;">
+                                                <tr>
+                                                    <th style="border: 1px solid #ddd; padding: 8px;">Équipe</th>
+                                                    <th style="border: 1px solid #ddd; padding: 8px;">Chef d'équipe</th>
+                                                    <th style="border: 1px solid #ddd; padding: 8px;">Membres</th>
+                                                    <th style="border: 1px solid #ddd; padding: 8px;">Taux de réussite</th>
+                                                    <th style="border: 1px solid #ddd; padding: 8px;">Taux d'occupation</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td style="border: 1px solid #ddd; padding: 8px;"><span t-esc="data['team'].name"/></td>
+                                                    <td style="border: 1px solid #ddd; padding: 8px;"><span t-esc="data['team'].leader_id.name"/></td>
+                                                    <td style="border: 1px solid #ddd; padding: 8px;"><span t-esc="data['team'].total_members"/></td>
+                                                    <t t-if="data['metrics']">
+                                                        <td style="border: 1px solid #ddd; padding: 8px;"><span t-esc="'%.2f' % data['metrics']['success_rate']"/>%</td>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <td style="border: 1px solid #ddd; padding: 8px;">N/A</td>
+                                                    </t>
+                                                    <td style="border: 1px solid #ddd; padding: 8px;"><span t-esc="'%.2f' % data['metrics']['occupation_rate']"/>%</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- KPIs et Métriques détaillées -->
+                                <div style="margin-top: 20px;">
+                                    <h3 style="text-align: center;">INDICATEURS DE PERFORMANCE</h3>
+                                    <table class="table" style="width: 100%; border-collapse: collapse;">
+                                        <thead style="background-color: #c2eaba;">
+                                            <tr>
+                                                <th style="border: 1px solid #ddd; padding: 8px;">Demandes ouvertes</th>
+                                                <th style="border: 1px solid #ddd; padding: 8px;">Temps moyen de réponse</th>
+                                                <th style="border: 1px solid #ddd; padding: 8px;">MTTR</th>
+                                                <th style="border: 1px solid #ddd; padding: 8px;">MTBF</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td style="border: 1px solid #ddd; padding: 8px;"><span t-esc="data['metrics']['open_requests']"/></td>
+                                                <td style="border: 1px solid #ddd; padding: 8px;"><span t-esc="'%.2f' % data['metrics']['mean_response_time']"/> h</td>
+                                                <td style="border: 1px solid #ddd; padding: 8px;"><span t-esc="'%.2f' % data['metrics']['mttr']"/> h</td>
+                                                <td style="border: 1px solid #ddd; padding: 8px;"><span t-esc="'%.2f' % data['metrics']['mtbf']"/> h</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Graphiques -->
+                                <div style="margin-top: 20px;">
+                                    <div class="row">
+                                        <!-- Graphique de performance -->
+                                        <div class="col-6">
+                                            <h4 style="text-align: center;">Performance Générale</h4>
+                                            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                                                <img t-if="data['charts']['performance']"
+                                                     t-att-src="'data:image/png;base64,%s' % data['charts']['performance']"
+                                                     style="width: 100%;"/>
+                                            </div>
+                                        </div>
+                                        <!-- Graphique d'évolution -->
+                                        <div class="col-6">
+                                            <h4 style="text-align: center;">Évolution du Taux de Réussite</h4>
+                                            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                                                <img t-if="data['charts']['success_rate']"
+                                                     t-att-src="'data:image/png;base64,%s' % data['charts']['success_rate']"
+                                                     style="width: 100%;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Graphique de répartition -->
+                                    <div class="row" style="margin-top: 20px;">
+                                        <div class="col-12">
+                                            <h4 style="text-align: center;">Répartition des Types de Demandes</h4>
+                                            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+                                                <img t-if="data['charts']['request_type']"
+                                                     t-att-src="'data:image/png;base64,%s' % data['charts']['request_type']"
+                                                     style="width: 70%; margin: 0 auto; display: block;"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pied de page avec annotations -->
+                                <div style="margin-top: 20px; font-size: 12px; color: #666;">
+                                    <p><strong>Notes:</strong></p>
+                                    <ul>
+                                        <li>MTTR: Mean Time To Repair (Temps moyen de réparation)</li>
+                                        <li>MTBF: Mean Time Between Failures (Temps moyen entre pannes)</li>
+                                        <li>Les taux sont calculés sur la période sélectionnée</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                    <t t-else="">
+                        <p>Aucune donnée disponible pour l'équipe sélectionnée.</p>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

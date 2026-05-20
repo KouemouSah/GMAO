@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Vue form du wizard rapport financier -->
+        <record id="view_gmao_financial_report_form" model="ir.ui.view">
+            <field name="name">gmao.financial.report.form</field>
+            <field name="model">gmao.financial.report</field>
+            <field name="arch" type="xml">
+                <form string="Rapport financier GMAO">
+                    <header>
+                        <button name="action_print_pdf" type="object" string="Imprimer PDF" class="oe_highlight"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1 style="color:#875A7B;"><i class="fa fa-money"/> Rapport financier maintenance</h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="date_from"/>
+                                <field name="date_to"/>
+                            </group>
+                            <group>
+                                <field name="site_id" options="{'no_create': True}"/>
+                            </group>
+                        </group>
+
+                        <!-- KPIs synthese -->
+                        <h3 style="border-bottom:2px solid #875A7B; padding-bottom:5px;">Synthese</h3>
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="card text-center" style="background-color:#875A7B; color:white;">
+                                    <div class="card-body p-2">
+                                        <small>COUT TOTAL</small>
+                                        <h3 style="margin:0;"><field name="total_cost" widget="monetary" nolabel="1"/></h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-2">
+                                        <small class="text-muted">PIECES</small>
+                                        <h3 style="margin:0;"><field name="total_parts_cost" widget="monetary" nolabel="1"/></h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-2">
+                                        <small class="text-muted">MAIN D'OEUVRE</small>
+                                        <h3 style="margin:0;"><field name="total_labor_cost" widget="monetary" nolabel="1"/></h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-2">
+                                        <small class="text-muted">COUT MOY/INTERV.</small>
+                                        <h3 style="margin:0;"><field name="avg_cost_per_request" widget="monetary" nolabel="1"/></h3>
+                                        <small><field name="requests_count" nolabel="1"/> interventions</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-3">
+                                <div class="card text-center" style="background-color:#28a745; color:white;">
+                                    <div class="card-body p-2">
+                                        <small>% PREVENTIF</small>
+                                        <h3 style="margin:0;"><field name="pct_preventive_cost" nolabel="1"/>%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center bg-light">
+                                    <div class="card-body p-2">
+                                        <small class="text-muted">REFACTURABLE</small>
+                                        <h3 style="margin:0;"><field name="billable_amount" widget="monetary" nolabel="1"/></h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card text-center" style="background-color:#17a2b8; color:white;">
+                                    <div class="card-body p-2">
+                                        <small>MARGE REFACTURATION</small>
+                                        <h3 style="margin:0;"><field name="billable_margin" widget="monetary" nolabel="1"/></h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-6">
+                                <h4 style="border-bottom:2px solid #875A7B;">Cout par equipement</h4>
+                                <field name="cost_by_equipment_html" nolabel="1" widget="html"/>
+                            </div>
+                            <div class="col-6">
+                                <h4 style="border-bottom:2px solid #875A7B;">Cout par site</h4>
+                                <field name="cost_by_site_html" nolabel="1" widget="html"/>
+                                <h4 style="border-bottom:2px solid #875A7B; margin-top:15px;">ROI preventif vs correctif</h4>
+                                <field name="roi_html" nolabel="1" widget="html"/>
+                            </div>
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_gmao_financial_report" model="ir.actions.act_window">
+            <field name="name">Rapport financier</field>
+            <field name="res_model">gmao.financial.report</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_gmao_financial_report_form"/>
+            <field name="target">current</field>
+        </record>
+
+        <!-- Rapport QWeb PDF -->
+        <record id="action_report_gmao_financial" model="ir.actions.report">
+            <field name="name">Rapport financier GMAO (PDF)</field>
+            <field name="model">gmao.financial.report</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">gmao_suite.report_gmao_financial_template</field>
+            <field name="report_file">gmao_suite.report_gmao_financial</field>
+            <field name="print_report_name">'Rapport financier GMAO'</field>
+        </record>
+
+        <template id="report_gmao_financial_template">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <h2 style="color:#875A7B;">Rapport financier maintenance</h2>
+                            <p class="text-muted">
+                                Periode : <span t-field="o.date_from"/> au <span t-field="o.date_to"/>
+                                <t t-if="o.site_id"> | Site : <span t-field="o.site_id"/></t>
+                            </p>
+                            <div class="row mt-3">
+                                <div class="col-4"><strong>Cout total :</strong> <span t-esc="'%.2f' % o.total_cost"/> EUR</div>
+                                <div class="col-4"><strong>Pieces :</strong> <span t-esc="'%.2f' % o.total_parts_cost"/> EUR</div>
+                                <div class="col-4"><strong>Main d'oeuvre :</strong> <span t-esc="'%.2f' % o.total_labor_cost"/> EUR</div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-4"><strong>% preventif :</strong> <span t-esc="'%.1f' % o.pct_preventive_cost"/>%</div>
+                                <div class="col-4"><strong>Refacturable :</strong> <span t-esc="'%.2f' % o.billable_amount"/> EUR</div>
+                                <div class="col-4"><strong>Marge :</strong> <span t-esc="'%.2f' % o.billable_margin"/> EUR</div>
+                            </div>
+                            <h3 class="mt-4">Cout par equipement</h3>
+                            <div t-raw="o.cost_by_equipment_html"/>
+                            <h3 class="mt-4">Cout par site</h3>
+                            <div t-raw="o.cost_by_site_html"/>
+                            <h3 class="mt-4">ROI preventif vs correctif</h3>
+                            <div t-raw="o.roi_html"/>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

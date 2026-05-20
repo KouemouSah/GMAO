@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!--
+            Cette vue n'expose plus que le raccourci "Admin global GMAO".
+            Les droits granulaires par domaine sont accessibles via les groupes
+            standards Odoo dans la categorie "GMAO Suite / Maintenance" plus haut
+            dans la meme page "Droits d'acces" (cocher / decocher les groupes).
+
+            Les champs *_profile restent declares cote modele Python pour usage
+            programmatique (onchange / migration), mais ne sont plus dupliques
+            dans cette vue afin d'eviter la redondance visuelle.
+        -->
+        <record id="view_users_form_gmao_suite" model="ir.ui.view">
+            <field name="name">res.users.form.gmao.suite</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='access_rights']" position="inside">
+                    <group string="Raccourci administration GMAO Suite">
+                        <field name="gmao_admin"
+                               help="Coche pour accorder TOUS les droits administrateur de tous les domaines GMAO en une fois. Sinon, gerer les droits granulaires via les groupes 'GMAO Suite / ...' plus haut."/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
