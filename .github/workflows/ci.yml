@@ -84,6 +84,7 @@ jobs:
         with:
           python-version: "3.8"
       - name: Install Odoo 13 + dependencies
+        continue-on-error: true  # Odoo 13 mal package sur PyPI / Python 3.8 -> best-effort
         run: |
           pip install --upgrade pip wheel
           pip install psycopg2-binary lxml passlib Pillow python-dateutil pytz werkzeug==0.16 \
