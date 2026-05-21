@@ -1,6 +1,6 @@
 <div align="center">
 
-## **GMAO Suite** 
+# **GMAO Suite** 
 
 **Gestion de Maintenance Assistée par Ordinateur**
 
@@ -10,7 +10,7 @@
 [![Odoo](https://img.shields.io/badge/Odoo-13.0%20CE-714B67?logo=odoo&logoColor=white)](https://www.odoo.com/) [![Python](https://img.shields.io/badge/Python-3.7%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/) [![License](https://img.shields.io/badge/License-LGPL--3-blue)](LICENSE) [![Pages](https://img.shields.io/badge/GitHub-Pages-181717?logo=github&logoColor=white)](https://kouemousah.github.io/GMAO/)
 
 </div>
----
+
 
 ## 🌐 Pages du projet (GitHub Pages)
 
