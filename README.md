@@ -1,10 +1,11 @@
 <div align="center">
-<img src="gmao_suite/static/description/icon.png" alt="GMAO" width="140">
-# GMAO Suite  
+
+## **GMAO Suite** 
+
 **Gestion de Maintenance Assistée par Ordinateur**
 
-> Module complet de **GMAO** développé nativement pour **Odoo 13 Community Edition**  
-> Auteur : **Emac SAH** — [github.com/kouemousah/GMAO](https://github.com/kouemousah/GMAO)
+ Module complet de **GMAO** développé nativement pour **Odoo 13 Community Edition**  
+ Auteur : **Emac SAH** — [github.com/kouemousah/GMAO](https://github.com/kouemousah/GMAO)
 
 [![Odoo](https://img.shields.io/badge/Odoo-13.0%20CE-714B67?logo=odoo&logoColor=white)](https://www.odoo.com/) [![Python](https://img.shields.io/badge/Python-3.7%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/) [![License](https://img.shields.io/badge/License-LGPL--3-blue)](LICENSE) [![Pages](https://img.shields.io/badge/GitHub-Pages-181717?logo=github&logoColor=white)](https://kouemousah.github.io/GMAO/)
 
