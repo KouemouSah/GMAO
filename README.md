@@ -11,6 +11,7 @@
 
 </div>
 
+---
 
 ## 🌐 Pages du projet (GitHub Pages)
 
